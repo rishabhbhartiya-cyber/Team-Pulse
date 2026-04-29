@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeamPulse – Daily Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#0a0d14;--surface:#111520;--card:#161c2d;--border:#1f2940;--accent:#4f8ef7;--accent2:#7c3aed;--green:#22c55e;--yellow:#f59e0b;--red:#ef4444;--text:#e8eaf2;--muted:#6b7a99;--radius:14px;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+nav{display:flex;align-items:center;justify-content:space-between;padding:13px 26px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;gap:12px;flex-wrap:wrap;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;letter-spacing:-.5px;white-space:nowrap;}
+.logo span{color:var(--accent);}
+.nav-center{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;}
+.nav-tab{padding:7px 15px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;background:transparent;color:var(--muted);transition:all .2s;white-space:nowrap;}
+.nav-tab.active{background:var(--accent);color:#fff;}
+.nav-tab:hover:not(.active){background:var(--border);color:var(--text);}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex-shrink:0;transition:background .3s;}
+.sync-dot.ok{background:var(--green);}.sync-dot.syncing{background:var(--yellow);animation:pulse 1s infinite;}.sync-dot.err{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.sync-lbl{font-size:11px;color:var(--muted);}
+.gs-badge{font-size:11px;background:rgba(34,197,94,.15);color:var(--green);padding:4px 10px;border-radius:99px;border:1px solid rgba(34,197,94,.3);font-weight:600;white-space:nowrap;}
+.view{display:none;padding:26px;max-width:1320px;margin:0 auto;}
+.view.active{display:block;}
+h1{font-family:'Syne',sans-serif;font-weight:700;font-size:25px;margin-bottom:4px;}
+h2{font-family:'Syne',sans-serif;font-weight:600;font-size:17px;margin-bottom:13px;}
+h3{font-family:'Syne',sans-serif;font-weight:600;font-size:14px;margin-bottom:9px;}
+.subtitle{color:var(--muted);font-size:13px;margin-bottom:22px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.cg{display:grid;gap:13px;}
+.c2{grid-template-columns:repeat(2,1fr);}.c3{grid-template-columns:repeat(3,1fr);}.c4{grid-template-columns:repeat(4,1fr);}
+.kpi{text-align:center;}
+.kpi .val{font-family:'Syne',sans-serif;font-size:32px;font-weight:700;color:var(--accent);}
+.kpi .lbl{font-size:11px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.06em;}
+.fg{display:grid;gap:13px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));}
+.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;font-weight:500;}
+.field input,.field select,.field textarea{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;transition:border .2s;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);}
+.field select option{background:var(--surface);}
+.field textarea{resize:vertical;min-height:80px;}
+.fc{grid-column:1/-1;}
+input[type=date]::-webkit-calendar-picker-indicator,input[type=time]::-webkit-calendar-picker-indicator{filter:invert(1) opacity(.4);cursor:pointer;}
+.rrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px;}
+.rbtn{width:35px;height:35px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.rbtn.sel{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn{padding:9px 20px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;transition:all .2s;}
+.btn-primary{background:var(--accent);color:#fff;}.btn-primary:hover{background:#3b7ef5;}
+.btn-green{background:#166534;color:#86efac;}.btn-green:hover{background:#14532d;}
+.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);}.btn-ghost:hover{background:var(--border);}
+.btn-danger{background:#7f1d1d;color:#fca5a5;}.btn-danger:hover{background:#991b1b;}
+.btn-export{background:linear-gradient(135deg,#166534,#14532d);color:#86efac;border:1px solid rgba(134,239,172,.3);}
+.btn-export:hover{background:linear-gradient(135deg,#15803d,#166534);}
+.tw{overflow-x:auto;border-radius:var(--radius);border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{background:var(--surface);padding:10px 12px;text-align:left;color:var(--muted);font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border);white-space:nowrap;}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(79,142,247,.04);}
+.band{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.03em;display:inline-block;}
+.band-excellent{background:#14532d;color:#86efac;}.band-good{background:#1e3a5f;color:#93c5fd;}
+.band-acceptable{background:#3b2600;color:#fcd34d;}.band-watch{background:#450a0a;color:#fca5a5;}
+.sbadge{display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600;}
+.sb-done{background:#1e3a5f;color:#93c5fd;}.sb-pend{background:#3b2600;color:#fcd34d;}.sb-none{background:#1a1a2e;color:#6b7a99;}
+#toast{position:fixed;bottom:22px;right:22px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;opacity:0;transform:translateY(10px);transition:all .3s;z-index:9999;pointer-events:none;max-width:340px;}
+#toast.show{opacity:1;transform:translateY(0);}
+#toast.success{background:#166534;color:#bbf7d0;border:1px solid rgba(134,239,172,.3);}
+#toast.error{background:#7f1d1d;color:#fca5a5;border:1px solid rgba(252,165,165,.3);}
+#toast.info{background:#1e3a5f;color:#93c5fd;border:1px solid rgba(147,197,253,.3);}
+.loader-overlay{position:fixed;inset:0;background:rgba(10,13,20,.85);z-index:9000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;backdrop-filter:blur(4px);}
+.loader-overlay.hidden{display:none;}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top:3px solid var(--accent);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loader-msg{font-size:14px;color:var(--muted);}
+.stabs{display:flex;gap:7px;margin-bottom:16px;flex-wrap:wrap;}
+.stab{padding:6px 14px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;transition:all .15s;}
+.stab.active{background:var(--accent2);border-color:var(--accent2);color:#fff;}
+.asec{display:none;}.asec.active{display:block;}
+.sstrip{display:flex;gap:11px;margin-bottom:20px;flex-wrap:wrap;}
+.sblock{flex:1;min-width:200px;border-radius:var(--radius);padding:15px 17px;display:flex;gap:12px;align-items:flex-start;border:1px solid var(--border);}
+.sm{background:linear-gradient(135deg,#0f2a1e,#0a1a12);border-color:#1a4d2e;}
+.se{background:linear-gradient(135deg,#1a1a2e,#0f0f2a);border-color:#2d2d5e;}
+.si{font-size:24px;line-height:1;flex-shrink:0;}.sinfo{flex:1;}
+.stime{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:3px;}
+.sm .stime{color:#4ade80;}.se .stime{color:#818cf8;}
+.slbl{font-size:12px;font-weight:600;margin-bottom:4px;}
+.sul{list-style:none;padding:0;}
+.sul li{font-size:11px;color:var(--muted);padding:2px 0 2px 12px;position:relative;}
+.sul li::before{content:'>';position:absolute;left:0;color:var(--accent);}
+.snote{font-size:10px;color:var(--muted);border-top:1px solid var(--border);margin-top:6px;padding-top:6px;font-style:italic;}
+.step-hero{border-radius:var(--radius);padding:18px 22px;margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.hero-m{background:linear-gradient(135deg,#0d2b1a,#091510);border:1px solid #1a4d2e;}
+.hero-e{background:linear-gradient(135deg,#16163a,#0d0d22);border:1px solid #2d2d5e;}
+.step-icon{font-size:32px;}.step-info h2{margin-bottom:2px;font-size:16px;}.step-info p{color:var(--muted);font-size:12px;}
+.step-badge{margin-left:auto;padding:5px 13px;border-radius:7px;font-size:11px;font-weight:700;}
+.tb-m{background:#166534;color:#bbf7d0;}.tb-e{background:#2e1065;color:#ddd6fe;}
+.cfy-box{background:rgba(255,87,34,.06);border:1px solid rgba(255,87,34,.25);border-radius:10px;padding:13px 15px;margin-top:13px;}
+.cfy-t{display:flex;align-items:center;gap:7px;margin-bottom:9px;}
+.cfy-dot{width:9px;height:9px;background:#ff5722;border-radius:50%;flex-shrink:0;}
+.cfy-badge{font-size:10px;background:#ff5722;color:#fff;padding:2px 6px;border-radius:99px;font-weight:700;letter-spacing:.04em;}
+.mcard{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px 15px;transition:border .2s;}
+.mcard:hover{border-color:var(--accent);}
+.setup-panel{background:linear-gradient(135deg,#0d2040,#0a1428);border:1px solid rgba(79,142,247,.3);border-radius:var(--radius);padding:24px;margin-bottom:20px;}
+.setup-step{display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border);}
+.setup-step:last-child{border-bottom:none;}
+.step-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;margin-top:2px;}
+.step-body{flex:1;}.step-title{font-weight:600;font-size:14px;margin-bottom:4px;}.step-desc{font-size:12px;color:var(--muted);line-height:1.7;}
+code{background:rgba(79,142,247,.12);color:#93c5fd;padding:2px 7px;border-radius:5px;font-size:12px;font-family:monospace;}
+.export-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.sep{border:none;border-top:1px solid var(--border);margin:16px 0;}
+.rf{display:flex;gap:9px;align-items:center;flex-wrap:wrap;}.sp{flex:1;}
+.chart-wrap{position:relative;}canvas{width:100% !important;}
+@media(max-width:700px){.c4{grid-template-columns:repeat(2,1fr);}.c3{grid-template-columns:repeat(2,1fr);}.c2{grid-template-columns:1fr;}nav{padding:10px 12px;}.view{padding:13px;}}
+</style>
+</head>
+<body>
+<div class="loader-overlay hidden" id="loader"><div class="spinner"></div><div class="loader-msg" id="loader-msg">Syncing with Google Sheets...</div></div>
+
+<nav>
+  <div class="logo">Team<span>Pulse</span></div>
+  <div class="nav-center">
+    <button class="nav-tab active" onclick="switchView('morning')">&#9728; Morning Check-In</button>
+    <button class="nav-tab" onclick="switchView('eod')">&#127769; EOD Report</button>
+    <button class="nav-tab" onclick="switchView('admin')">&#128202; Manager Dashboard</button>
+    <button class="nav-tab" onclick="switchView('employees')">&#128101; Team Setup</button>
+    <button class="nav-tab" onclick="switchView('setup')">&#9881; DB Setup</button>
+  </div>
+  <div class="nav-right">
+    <div class="sync-dot" id="sync-dot"></div>
+    <span class="sync-lbl" id="sync-lbl">Offline</span>
+    <span class="gs-badge">&#128202; Google Sheets</span>
+  </div>
+</nav>
+
+<!-- SETUP -->
+<div class="view" id="view-setup">
+  <h1>&#9881; Google Sheets Database Setup</h1>
+  <p class="subtitle">Connect TeamPulse to your Google Sheet in 4 steps — takes about 5 minutes.</p>
+  <div class="setup-panel">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+      <span style="font-size:22px;">&#128203;</span>
+      <div><div style="font-weight:700;font-size:15px;">One-Time Setup</div>
+      <div style="font-size:12px;color:var(--muted);">After setup, all team data syncs automatically to Google Sheets.</div></div>
+    </div>
+    <div class="setup-step"><div class="step-num">1</div><div class="step-body">
+      <div class="step-title">Create a Google Sheet</div>
+      <div class="step-desc">Go to <a href="https://sheets.google.com" target="_blank" style="color:var(--accent);">sheets.google.com</a> and create a new blank spreadsheet named <strong>"TeamPulse Data"</strong>. Copy the Sheet ID from the URL (the long string between /d/ and /edit).</div>
+    </div></div>
+    <div class="setup-step"><div class="step-num">2</div><div class="step-body">
+      <div class="step-title">Create the Apps Script Backend</div>
+      <div class="step-desc">Go to <a href="https://script.google.com" target="_blank" style="color:var(--accent);">script.google.com</a> &rarr; New project. Delete all existing code. Paste the entire contents of <strong>apps-script-backend.js</strong>. Replace <code>YOUR_SPREADSHEET_ID_HERE</code> with your Sheet ID. Save (Ctrl+S).</div>
+    </div></div>
+    <div class="setup-step"><div class="step-num">3</div><div class="step-body">
+      <div class="step-title">Run setupSheets, then Deploy as Web App</div>
+      <div class="step-desc">
+        <strong>Step A — Run setup:</strong><br>
+        Select function <code>setupSheets</code> from the dropdown &rarr; Click &nbsp;&#9658;&nbsp; Run &rarr; Click "Review permissions" &rarr; Choose your Google account &rarr; Click "Advanced" &rarr; "Go to (unsafe)" &rarr; Allow.<br><br>
+        <strong>Step B — Deploy:</strong><br>
+        Click <strong>Deploy &rarr; New Deployment</strong><br>
+        Click the gear icon &rarr; Select <strong>Web App</strong><br>
+        Set <em>Execute as</em>: <strong>Me</strong><br>
+        Set <em>Who has access</em>: <strong>Anyone</strong> (not "Anyone with Google Account" — must be just "Anyone")<br>
+        Click <strong>Deploy</strong> &rarr; Copy the <strong>Web App URL</strong><br><br>
+        <div style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--yellow);">
+          &#9888; If you update the script later, always click <strong>Deploy &rarr; Manage Deployments &rarr; Edit (pencil) &rarr; New version &rarr; Deploy</strong> to apply changes.
+        </div>
+      </div>
+    </div></div>
+    <div class="setup-step"><div class="step-num">4</div><div class="step-body">
+      <div class="step-title">Paste Your Web App URL &amp; Connect</div>
+      <div class="step-desc">Paste the deployed URL below and click Connect. All future submissions sync live to Google Sheets.</div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+        <input id="setup-url" type="text" placeholder="https://script.google.com/macros/s/.../exec"
+          style="flex:1;min-width:280px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:13px;outline:none;">
+        <button class="btn btn-primary" onclick="saveAndConnect()">&#128279; Connect</button>
+        <button class="btn btn-ghost" onclick="testConnection()">&#129514; Test</button>
+      </div>
+      <div id="setup-status" style="margin-top:8px;font-size:12px;color:var(--muted);"></div>
+      <div style="margin-top:14px;padding:12px 14px;background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.2);border-radius:9px;">
+        <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px;">&#128270; Common Connection Errors</div>
+        <div style="font-size:12px;color:var(--muted);line-height:1.8;">
+          <strong style="color:var(--text);">Error: Script function not found</strong> — You pasted old code. Replace ALL code with the new apps-script-backend.js<br>
+          <strong style="color:var(--text);">Error: Authorization required</strong> — Set "Who has access" to <strong>Anyone</strong> (not "Anyone with Google Account")<br>
+          <strong style="color:var(--text);">Timeout / no response</strong> — You may need to re-deploy after running setupSheets. Use Deploy → Manage Deployments → Edit → New Version<br>
+          <strong style="color:var(--text);">Still failing?</strong> — Open the URL directly in your browser. You should see JSON data, not an error page.
+        </div>
+      </div>
+    </div></div>
+  </div>
+  <div class="card">
+    <h2>Current Status</h2>
+    <div class="fg" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr));">
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">CONNECTED URL</div><div id="status-url" style="font-size:12px;word-break:break-all;">Not connected</div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">SYNC STATUS</div><div id="status-sync" style="font-size:12px;">Offline</div></div>
+      <div><div style="font-size:11px;color:var(--muted);margin-bottom:4px;">LAST SYNC</div><div id="status-last" style="font-size:12px;">Never</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MORNING CHECK-IN -->
+<div class="view" id="view-morning">
+  <div class="step-hero hero-m">
+    <div class="step-icon">&#9728;</div>
+    <div class="step-info"><h2>Morning Check-In</h2><p>Log your arrival, set work mode &amp; share today's task plan with the manager.</p></div>
+    <div class="step-badge tb-m" id="morningLabel"></div>
+  </div>
+  <div class="sstrip">
+    <div class="sblock sm"><div class="si">&#9728;</div><div class="sinfo">
+      <div class="stime" id="sched-m">9:00 AM - 9:15 AM</div><div class="slbl">Morning Routine</div>
+      <ul class="sul"><li>Log in &amp; start Clockify timer</li><li>Submit this check-in form</li><li>Share today's top priorities</li></ul>
+      <div class="snote">Flexible shift? Times auto-adjust to your shift start</div>
+    </div></div>
+    <div class="sblock se"><div class="si">&#127769;</div><div class="sinfo">
+      <div class="stime" id="sched-e">6:00 PM - 6:15 PM</div><div class="slbl">End-of-Day Report</div>
+      <ul class="sul"><li>Stop Clockify - note total hours</li><li>Fill EOD Report tab</li><li>Flag any blockers</li></ul>
+      <div class="snote">Submit before you log out - takes 3 minutes</div>
+    </div></div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h3>Who are you?</h3>
+    <div class="fg">
+      <div class="field"><label>Your Name *</label><select id="m-emp" onchange="onMornEmp()"><option value="">-- Select --</option></select></div>
+      <div class="field"><label>Team</label><input id="m-team" readonly style="opacity:.6;"></div>
+      <div class="field"><label>Date *</label><input type="date" id="m-date"></div>
+      <div class="field"><label>Work Mode *</label><select id="m-mode"><option value="">-- Select --</option><option value="Remote">Remote</option><option value="Office">Office</option></select></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h3>Login Time</h3>
+    <div class="fg">
+      <div class="field"><label>Login Time *</label><input type="time" id="m-login" oninput="checkOT()"></div>
+      <div class="field"><label>On-Time Status</label><input id="m-otstatus" readonly style="opacity:.8;"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h3>Today's Task Plan <span style="font-size:11px;color:var(--muted);font-weight:400;">- Manager sees this in real time after you submit</span></h3>
+    <div class="fg">
+      <div class="field"><label>Number of Tasks Planned *</label><input type="number" id="m-tplan" min="0" max="20" placeholder="e.g. 4"></div>
+      <div class="field fc"><label>Describe Your Tasks for Today *</label>
+        <textarea id="m-tdesc" rows="5" placeholder="List each task on a new line:&#10;1. Client report draft&#10;2. QA review module 3&#10;3. Team sync call at 11am&#10;4. Update project tracker"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="rf">
+    <button class="btn btn-ghost" onclick="clearMorn()">Clear</button>
+    <div class="sp"></div>
+    <button class="btn btn-green" style="padding:11px 30px;font-size:14px;" onclick="submitMorn()">Submit Morning Check-In</button>
+  </div>
+</div>
+
+<!-- EOD REPORT -->
+<div class="view" id="view-eod">
+  <div class="step-hero hero-e">
+    <div class="step-icon">&#127769;</div>
+    <div class="step-info"><h2>End-of-Day Report</h2><p>Before logging out - time, tasks, Clockify hours &amp; any blockers.</p></div>
+    <div class="step-badge tb-e" id="eodLabel"></div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h3>Select Your Profile</h3>
+    <div class="fg">
+      <div class="field"><label>Your Name *</label><select id="e-emp" onchange="onEodEmp()"><option value="">-- Select --</option></select></div>
+      <div class="field"><label>Team</label><input id="e-team" readonly style="opacity:.6;"></div>
+      <div class="field"><label>Date *</label><input type="date" id="e-date" onchange="onEodEmp()"></div>
+      <div class="field"><label>Work Mode</label><input id="e-moded" readonly style="opacity:.6;" placeholder="From morning check-in"></div>
+    </div>
+    <div id="eod-ci-status" style="margin-top:11px;display:none;"></div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h3>Time Tracking</h3>
+    <div class="fg">
+      <div class="field"><label>Login Time (from check-in)</label><input type="time" id="e-login"></div>
+      <div class="field"><label>Logout Time *</label><input type="time" id="e-logout" oninput="updateCfy()"></div>
+      <div class="field"><label>Break Hours</label><input type="number" id="e-break" min="0" max="4" step="0.25" placeholder="0.5" oninput="updateCfy()"></div>
+    </div>
+    <div class="cfy-box">
+      <div class="cfy-t"><div class="cfy-dot"></div>
+        <span style="font-size:13px;font-weight:600;color:#ff8a65;">Clockify - Compare vs System Hours</span>
+        <span class="cfy-badge">Required</span>
+      </div>
+      <div class="fg" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));">
+        <div class="field"><label>Clockify Total Hours *</label>
+          <input type="number" id="e-cfy" min="0" max="16" step="0.25" placeholder="e.g. 7.5" oninput="updateCfy()">
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Clockify Dashboard - Today's total</div>
+        </div>
+        <div class="field"><label>System Hours (Login to Logout minus Break)</label>
+          <input id="e-sys" readonly style="opacity:.7;font-weight:600;" placeholder="Auto-calc">
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Calculated from your times</div>
+        </div>
+        <div class="field"><label>Difference (Clockify minus System)</label>
+          <input id="e-diff" readonly style="font-weight:700;" placeholder="--">
+          <div id="e-diff-hint" style="font-size:11px;color:var(--muted);margin-top:3px;">Should be close to 0</div>
+        </div>
+      </div>
+    </div>
+    <hr class="sep">
+    <div class="fg">
+      <div class="field"><label>Productive Hours</label><input type="number" id="e-prod" min="0" max="12" step="0.25" placeholder="5"></div>
+      <div class="field"><label>Meeting Hours</label><input type="number" id="e-meet" min="0" max="8" step="0.25" placeholder="2"></div>
+      <div class="field"><label>Admin Hours</label><input type="number" id="e-admin" min="0" max="4" step="0.25" placeholder="1"></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h3>Task Completion</h3>
+    <div id="eod-task-hint" style="display:none;margin-bottom:11px;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:9px;font-size:13px;"></div>
+    <div class="fg">
+      <div class="field"><label>Tasks Planned (from morning)</label><input type="number" id="e-tplan" readonly style="opacity:.6;" placeholder="From check-in"></div>
+      <div class="field"><label>Tasks Completed *</label><input type="number" id="e-tdone" min="0" max="20" placeholder="4"></div>
+    </div>
+    <hr class="sep">
+    <div class="fg">
+      <div class="field fc"><label>Tasks Completed - Describe</label><textarea id="e-tdonetext" placeholder="e.g. Client report submitted, QA module 3 done..."></textarea></div>
+      <div class="field fc"><label>Pending / Leftover Tasks</label><textarea id="e-pend" placeholder="e.g. Module 4 review pushed to tomorrow..."></textarea></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:14px;">
+    <h3>Self-Assessment <span style="font-size:11px;color:var(--muted);font-weight:400;">Manager also sees this</span></h3>
+    <div class="fg">
+      <div class="field"><label>Quality of Work (1-5)</label><div class="rrow" id="r-quality"></div></div>
+      <div class="field"><label>Responsiveness (1-5)</label><div class="rrow" id="r-resp"></div></div>
+      <div class="field"><label>Ownership and Initiative (1-5)</label><div class="rrow" id="r-own"></div></div>
+    </div>
+  </div>
+  <div class="card" style="margin-bottom:18px;">
+    <h3>Notes and Blockers</h3>
+    <div class="fg">
+      <div class="field fc"><label>Blockers / Issues Faced</label><textarea id="e-block" placeholder="Waiting for data, access, approval..."></textarea></div>
+      <div class="field fc"><label>Support Needed from Manager</label><textarea id="e-support" placeholder="What do you need help with?"></textarea></div>
+      <div class="field fc"><label>Plan for Tomorrow</label><textarea id="e-tmr" placeholder="Top priorities for tomorrow..."></textarea></div>
+    </div>
+  </div>
+  <div class="rf">
+    <button class="btn btn-ghost" onclick="clearEod()">Clear</button>
+    <div class="sp"></div>
+    <button class="btn btn-primary" style="padding:11px 30px;font-size:14px;" onclick="submitEod()">Submit EOD Report</button>
+  </div>
+</div>
+
+<!-- MANAGER DASHBOARD -->
+<div class="view" id="view-admin">
+  <div class="rf" style="margin-bottom:10px;">
+    <div><h1>Manager Dashboard</h1><p class="subtitle">Live from Google Sheets</p></div>
+    <div class="sp"></div>
+    <div class="field" style="min-width:155px;"><label>Date</label><input type="date" id="admin-date" onchange="renderDash()"></div>
+    <div class="field" style="min-width:120px;"><label>Team</label>
+      <select id="admin-team" onchange="renderDash()"><option value="">All Teams</option></select>
+    </div>
+    <button class="btn btn-ghost" style="padding:9px 14px;font-size:12px;" onclick="refreshFromSheets()">Refresh</button>
+  </div>
+  <div class="export-row">
+    <button class="btn btn-export" onclick="exportCSV('eod')">Export EOD Reports (CSV)</button>
+    <button class="btn btn-export" onclick="exportCSV('checkins')">Export Check-Ins (CSV)</button>
+    <button class="btn btn-export" onclick="exportCSV('monthly')">Monthly Summary (CSV)</button>
+    <button class="btn btn-ghost" style="font-size:12px;" onclick="exportCSV('full')">Full Data Export</button>
+  </div>
+  <div class="stabs">
+    <button class="stab active" onclick="switchAS('mview',this)">Morning Tasks</button>
+    <button class="stab" onclick="switchAS('overview',this)">Overview</button>
+    <button class="stab" onclick="switchAS('charts',this)">Charts</button>
+    <button class="stab" onclick="switchAS('log',this)">All Reports</button>
+    <button class="stab" onclick="switchAS('manage',this)">Score Control</button>
+  </div>
+  <div class="asec active" id="asec-mview">
+    <div class="cg c4" style="margin-bottom:14px;">
+      <div class="card kpi"><div class="val" id="mk-in">0</div><div class="lbl">Checked In</div></div>
+      <div class="card kpi"><div class="val" id="mk-ot" style="color:var(--green)">0</div><div class="lbl">On Time</div></div>
+      <div class="card kpi"><div class="val" id="mk-late" style="color:var(--yellow)">0</div><div class="lbl">Late</div></div>
+      <div class="card kpi"><div class="val" id="mk-miss" style="color:var(--red)">0</div><div class="lbl">Not Checked In</div></div>
+    </div>
+    <div class="card" style="margin-bottom:14px;">
+      <div class="rf" style="margin-bottom:12px;">
+        <h2 style="margin:0;">Today's Task Plans</h2><div class="sp"></div>
+        <span id="mk-updated" style="font-size:11px;color:var(--muted);"></span>
+      </div>
+      <div id="morning-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:11px;"></div>
+    </div>
+    <div class="card"><h2>Attendance Status</h2>
+      <div class="tw"><table>
+        <thead><tr><th>Employee</th><th>Team</th><th>Mode</th><th>Login</th><th>On-Time</th><th>Tasks Planned</th><th>EOD Status</th></tr></thead>
+        <tbody id="att-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="asec" id="asec-overview">
+    <div class="cg c4" style="margin-bottom:14px;">
+      <div class="card kpi"><div class="val" id="k-present">0</div><div class="lbl">EOD Reports</div></div>
+      <div class="card kpi"><div class="val" id="k-avg" style="color:var(--green)">-</div><div class="lbl">Avg Score</div></div>
+      <div class="card kpi"><div class="val" id="k-comp" style="color:var(--accent2)">0%</div><div class="lbl">Complete Logs</div></div>
+      <div class="card kpi"><div class="val" id="k-blk" style="color:var(--yellow)">0</div><div class="lbl">Blockers</div></div>
+    </div>
+    <div class="cg c2" style="margin-bottom:14px;">
+      <div class="card"><h2>Top Performers</h2><div id="top-perf"></div></div>
+      <div class="card"><h2>Needs Attention</h2><div id="watch-list"></div></div>
+    </div>
+    <div class="card"><h2>EOD Snapshot</h2>
+      <div class="tw"><table>
+        <thead><tr><th>Employee</th><th>Team</th><th>Mode</th><th>Login</th><th>Logout</th><th>Sys Hrs</th><th>Clockify</th><th>Diff</th><th>Tasks</th><th>Score</th><th>Band</th></tr></thead>
+        <tbody id="snap-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="asec" id="asec-charts">
+    <div class="cg c2" style="margin-bottom:14px;">
+      <div class="card"><h2>Productivity Scores</h2><div class="chart-wrap" style="height:270px;"><canvas id="ch-scores"></canvas></div></div>
+      <div class="card"><h2>Time Distribution</h2><div class="chart-wrap" style="height:270px;"><canvas id="ch-time"></canvas></div></div>
+    </div>
+    <div class="cg c2" style="margin-bottom:14px;">
+      <div class="card"><h2>Task Completion</h2><div class="chart-wrap" style="height:250px;"><canvas id="ch-tasks"></canvas></div></div>
+      <div class="card"><h2>Band Distribution</h2><div class="chart-wrap" style="height:250px;"><canvas id="ch-band"></canvas></div></div>
+    </div>
+    <div class="cg c2">
+      <div class="card"><h2>Clockify vs System Hours</h2><div class="chart-wrap" style="height:230px;"><canvas id="ch-cfy"></canvas></div></div>
+      <div class="card"><h2>Remote vs Office</h2><div class="chart-wrap" style="height:230px;"><canvas id="ch-mode"></canvas></div></div>
+    </div>
+  </div>
+  <div class="asec" id="asec-log">
+    <div class="card" style="margin-bottom:14px;"><h2>Morning Check-In Log</h2>
+      <div class="tw"><table>
+        <thead><tr><th>Date</th><th>Employee</th><th>Team</th><th>Mode</th><th>Login</th><th>On-Time</th><th>Tasks</th><th>Task Description</th></tr></thead>
+        <tbody id="log-m-body"></tbody>
+      </table></div>
+    </div>
+    <div class="card">
+      <div class="rf" style="margin-bottom:12px;"><h2 style="margin:0;">EOD Report Log</h2><div class="sp"></div>
+        <button class="btn btn-danger" style="padding:6px 13px;font-size:11px;" onclick="clearAll()">Clear Local Data</button>
+      </div>
+      <div class="tw"><table>
+        <thead><tr><th>Date</th><th>Employee</th><th>Team</th><th>Logout</th><th>Sys Hrs</th><th>Clockify</th><th>Diff</th><th>Tasks</th><th>Q</th><th>R</th><th>O</th><th>Score</th><th>Band</th><th>Blocker</th></tr></thead>
+        <tbody id="log-e-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+  <div class="asec" id="asec-manage">
+    <div class="card"><h2>Override Scores</h2>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:12px;">Adjust Q/R/O ratings - score recalculates and syncs to Google Sheets.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Date</th><th>Employee</th><th>Quality</th><th>Responsiveness</th><th>Ownership</th><th>Score</th><th>Action</th></tr></thead>
+        <tbody id="manage-body"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM SETUP -->
+<div class="view" id="view-employees">
+  <h1>Team Setup</h1>
+  <p class="subtitle">Manage team members. Changes sync to Google Sheets automatically.</p>
+  <div class="cg c2">
+    <div class="card"><h2>Add Employee</h2>
+      <div class="fg" style="grid-template-columns:1fr;">
+        <div class="field"><label>Full Name *</label><input id="en-name" placeholder="e.g. Rahul Sharma"></div>
+        <div class="field"><label>Employee ID</label><input id="en-id" placeholder="e.g. E031 (auto if blank)"></div>
+        <div class="field"><label>Team *</label><select id="en-team"><option value="Team A">Team A</option><option value="Team B">Team B</option><option value="Team C">Team C</option><option value="Team D">Team D</option></select></div>
+        <div class="field"><label>Manager Name</label><input id="en-mgr" placeholder="Manager name"></div>
+        <div class="field"><label>Shift Start Time</label><input type="time" id="en-shift" value="09:00"></div>
+        <div><button class="btn btn-primary" onclick="addEmp()">Add Employee</button></div>
+      </div>
+    </div>
+    <div class="card"><h2>Team Members (<span id="emp-count">0</span>)</h2>
+      <div id="emp-list" style="display:flex;flex-direction:column;gap:7px;max-height:500px;overflow-y:auto;"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const DB={get:k=>{try{return JSON.parse(localStorage.getItem(k));}catch{return null;}},set:(k,v)=>localStorage.setItem(k,JSON.stringify(v))};
+let SCRIPT_URL=DB.get('tp_url')||'';
+let employees=DB.get('tp_emps')||[{id:'E001',name:'Rahul Sharma',team:'Team A',manager:'Manager',shift:'09:00',status:'Active'},{id:'E002',name:'Priya Verma',team:'Team B',manager:'Manager',shift:'09:00',status:'Active'},{id:'E003',name:'Amit Gupta',team:'Team C',manager:'Manager',shift:'09:00',status:'Active'},{id:'E004',name:'Sneha Joshi',team:'Team A',manager:'Manager',shift:'09:30',status:'Active'},{id:'E005',name:'Karan Mehta',team:'Team B',manager:'Manager',shift:'09:00',status:'Active'}];
+let checkins=DB.get('tp_ci')||[];
+let reports=DB.get('tp_rp')||[];
+let lastSync=DB.get('tp_ls')||null;
+
+// ── Google Apps Script CORS fix ──────────────────────────────
+// GAS doesn't send CORS headers for cross-origin fetch.
+// Solution: Use JSONP (script tag injection) for GET requests,
+// and encode POST data as URL params in a GET request.
+
+function gsJSONP(params){
+  return new Promise((resolve)=>{
+    const cb='_cb'+Date.now();
+    const script=document.createElement('script');
+    const cleanup=()=>{delete window[cb];script.remove();};
+    const timer=setTimeout(()=>{cleanup();resolve(null);},12000);
+    window[cb]=(data)=>{clearTimeout(timer);cleanup();resolve(data);};
+    script.src=SCRIPT_URL+'?'+params+'&callback='+cb;
+    script.onerror=()=>{clearTimeout(timer);cleanup();resolve(null);};
+    document.head.appendChild(script);
+  });
+}
+
+// For write operations: encode action+data as GET params (GAS handles both GET & POST)
+async function gsGet(p){
+  if(!SCRIPT_URL)return null;
+  try{return await gsJSONP(p);}catch{return null;}
+}
+async function gsPost(b){
+  if(!SCRIPT_URL)return null;
+  try{
+    // Encode the body as a single 'payload' GET param so GAS receives it via doGet
+    const encoded=encodeURIComponent(JSON.stringify(b));
+    return await gsJSONP('payload='+encoded);
+  }catch{return null;}
+}
+function setSS(s,m){const d=document.getElementById('sync-dot'),l=document.getElementById('sync-lbl');d.className='sync-dot '+(s==='ok'?'ok':s==='syncing'?'syncing':'err');l.textContent=m;}
+
+async function refreshFromSheets(){
+  if(!SCRIPT_URL){setSS('err','No URL');return;}
+  setSS('syncing','Syncing...');showLoader('Loading from Google Sheets...');
+  const data=await gsGet('action=getAll');hideLoader();
+  if(!data||data.error){setSS('err','Error');showToast('Could not reach Google Sheets. Showing local data.','error');return;}
+  checkins=(data.checkins||[]).map(mapCI);reports=(data.reports||[]).map(mapEOD);
+  if(data.employees&&data.employees.length>0)employees=data.employees.map(mapEmp);
+  DB.set('tp_ci',checkins);DB.set('tp_rp',reports);DB.set('tp_emps',employees);
+  lastSync=new Date().toLocaleTimeString();DB.set('tp_ls',lastSync);
+  setSS('ok','Synced');populateDDs();renderDash();
+  document.getElementById('status-last').textContent=lastSync;
+  showToast('Synced from Google Sheets!','success');
+}
+function mapCI(r){return{id:r['ID'],date:r['Date'],empId:r['Employee ID'],empName:r['Employee Name'],team:r['Team'],mode:r['Work Mode'],loginTime:r['Login Time'],onTime:r['On Time']==='Yes',tasksPlanned:parseInt(r['Tasks Planned'])||0,taskDesc:r['Task Description'],submittedAt:r['Submitted At']};}
+function mapEOD(r){return{id:r['ID'],date:r['Date'],empId:r['Employee ID'],empName:r['Employee Name'],team:r['Team'],mode:r['Work Mode'],loginTime:r['Login Time'],logoutTime:r['Logout Time'],breakHrs:parseFloat(r['Break Hrs'])||0,netHrs:parseFloat(r['Net Hours'])||0,clockifyHrs:r['Clockify Hrs']!==''?parseFloat(r['Clockify Hrs']):null,prodHrs:parseFloat(r['Productive Hrs'])||0,meetHrs:parseFloat(r['Meeting Hrs'])||0,adminHrs:parseFloat(r['Admin Hrs'])||0,tasksPlanned:parseInt(r['Tasks Planned'])||0,tasksDone:parseInt(r['Tasks Done'])||0,taskDoneText:r['Tasks Done Text'],pending:r['Pending Tasks'],quality:parseInt(r['Quality (1-5)'])||3,responsiveness:parseInt(r['Responsiveness (1-5)'])||3,ownership:parseInt(r['Ownership (1-5)'])||3,score:parseInt(r['Productivity Score'])||0,band:r['Band'],blocker:r['Blockers'],support:r['Support Needed'],tomorrow:r['Plan Tomorrow'],onTime:r['On Time']==='Yes',submittedAt:r['Submitted At']};}
+function mapEmp(r){return{id:r['ID'],name:r['Name'],team:r['Team'],manager:r['Manager'],shift:r['Shift Start'],status:r['Status']};}
+
+function calcScore(r){const onT=r.onTime?10:0,comp=(r.loginTime&&r.logoutTime&&r.tasksPlanned>0)?10:0,cPct=r.tasksPlanned>0?Math.min(r.tasksDone/r.tasksPlanned,1):0,q=((r.quality||3)/5)*20,rs=((r.responsiveness||3)/5)*10,ow=((r.ownership||3)/5)*10,net=calcNet(r.loginTime,r.logoutTime,r.breakHrs),foc=net>0?Math.min((r.prodHrs||0)/net,1)*10:0;return Math.round(onT+comp+cPct*30+q+rs+ow+foc);}
+function getBand(s){return s>=80?'Excellent':s>=65?'Good':s>=50?'Acceptable':'Watch';}
+function bCls(b){return 'band band-'+({Excellent:'excellent',Good:'good',Acceptable:'acceptable',Watch:'watch'}[b]||'watch');}
+function calcNet(login,logout,brk){if(!login||!logout)return 0;const[lh,lm]=login.split(':').map(Number),[oh,om]=logout.split(':').map(Number);return Math.max(0,(oh*60+om-lh*60-lm)/60-(parseFloat(brk)||0));}
+function isOT(login,shift){if(!login||!shift)return false;const[lh,lm]=login.split(':').map(Number),[sh,sm]=shift.split(':').map(Number);return(lh*60+lm)<=(sh*60+sm+15);}
+function f12(t){if(!t)return'--';const[h,m]=t.split(':').map(Number);return`${h>12?h-12:h||12}:${String(m).padStart(2,'0')} ${h>=12?'PM':'AM'}`;}
+
+function switchView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  document.querySelectorAll('.nav-tab')[{morning:0,eod:1,admin:2,employees:3,setup:4}[v]]?.classList.add('active');
+  if(v==='admin'){renderDash();if(SCRIPT_URL)refreshFromSheets();}
+  if(v==='employees')renderEmps();
+  if(v==='setup')updateSetupStatus();
+}
+function switchAS(id,btn){
+  document.querySelectorAll('.asec').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.stab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('asec-'+id).classList.add('active');btn.classList.add('active');
+  if(['charts','overview'].includes(id))renderCharts();
+}
+function updateSetupStatus(){
+  document.getElementById('setup-url').value=SCRIPT_URL||'';
+  document.getElementById('status-url').textContent=SCRIPT_URL||'Not connected';
+  document.getElementById('status-sync').textContent=SCRIPT_URL?'Connected':'Offline - using local storage';
+  document.getElementById('status-last').textContent=lastSync||'Never';
+}
+async function saveAndConnect(){const url=document.getElementById('setup-url').value.trim();if(!url)return;SCRIPT_URL=url;DB.set('tp_url',url);await testConnection();}
+async function testConnection(){
+  const url=document.getElementById('setup-url').value.trim()||SCRIPT_URL;if(!url){showToast('No URL entered','error');return;}
+  setSS('syncing','Testing...');document.getElementById('setup-status').textContent='Testing connection...';
+  const oldURL=SCRIPT_URL;SCRIPT_URL=url;
+  const data=await gsGet('action=getAll');
+  if(data&&!data.error){
+    setSS('ok','Connected');document.getElementById('setup-status').innerHTML='<span style="color:var(--green)">Connected! Google Sheets is live.</span>';
+    SCRIPT_URL=url;DB.set('tp_url',url);
+    if(data.checkins)checkins=data.checkins.map(mapCI);
+    if(data.reports)reports=data.reports.map(mapEOD);
+    if(data.employees&&data.employees.length>0)employees=data.employees.map(mapEmp);
+    DB.set('tp_ci',checkins);DB.set('tp_rp',reports);DB.set('tp_emps',employees);
+    lastSync=new Date().toLocaleTimeString();DB.set('tp_ls',lastSync);
+    populateDDs();updateSetupStatus();showToast('Google Sheets connected and data loaded!','success');
+  }else{
+    SCRIPT_URL=oldURL;setSS('err','Failed');
+    document.getElementById('setup-status').innerHTML='<span style="color:var(--red)">Could not connect. Check the URL and deployment settings.</span>';
+    showToast('Connection failed. Check URL and Apps Script deployment.','error');
+  }
+}
+
+function buildR(id){const c=document.getElementById(id);for(let i=1;i<=5;i++){const b=document.createElement('button');b.className='rbtn';b.textContent=i;b.onclick=()=>{c.querySelectorAll('.rbtn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');};c.appendChild(b);}}
+function getR(id){const s=document.querySelector('#'+id+' .rbtn.sel');return s?+s.textContent:0;}
+buildR('r-quality');buildR('r-resp');buildR('r-own');
+
+function init(){
+  const today=new Date().toISOString().slice(0,10);
+  ['m-date','e-date','admin-date'].forEach(id=>document.getElementById(id).value=today);
+  const now=new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true});
+  document.getElementById('morningLabel').textContent='Today - '+now;
+  document.getElementById('eodLabel').textContent='Today - '+now;
+  populateDDs();
+  const teams=[...new Set(employees.map(e=>e.team))];
+  const ts=document.getElementById('admin-team');
+  teams.forEach(t=>{const o=document.createElement('option');o.value=t;o.textContent=t;ts.appendChild(o);});
+  setSS(SCRIPT_URL?'ok':'err',SCRIPT_URL?'Connected':'No Sheet URL');
+  if(SCRIPT_URL)refreshFromSheets();
+}
+function populateDDs(){
+  ['m-emp','e-emp'].forEach(id=>{
+    const s=document.getElementById(id),cur=s.value;
+    s.innerHTML='<option value="">-- Select Employee --</option>';
+    employees.filter(e=>e.status==='Active').sort((a,b)=>a.name.localeCompare(b.name)).forEach(e=>{const o=document.createElement('option');o.value=e.id;o.textContent=e.name+' ('+e.team+')';s.appendChild(o);});
+    s.value=cur;
+  });
+}
+function onMornEmp(){
+  const emp=employees.find(e=>e.id===document.getElementById('m-emp').value);
+  document.getElementById('m-team').value=emp?emp.team:'';
+  if(emp){const[sh,sm]=emp.shift.split(':').map(Number);const ci=new Date(0,0,0,sh,sm+15),es=new Date(0,0,0,sh+8,sm),ee=new Date(0,0,0,sh+8,sm+15);const f=d=>d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});document.getElementById('sched-m').textContent=f(new Date(0,0,0,sh,sm))+' - '+f(ci);document.getElementById('sched-e').textContent=f(es)+' - '+f(ee);}
+  checkOT();
+}
+function checkOT(){
+  const login=document.getElementById('m-login').value,empId=document.getElementById('m-emp').value,emp=employees.find(e=>e.id===empId),el=document.getElementById('m-otstatus');
+  if(!login||!emp){el.value='';el.style.color='';return;}
+  const on=isOT(login,emp.shift);el.value=on?'On Time (Shift: '+f12(emp.shift)+')':'Late (Shift: '+f12(emp.shift)+', 15 min grace)';el.style.color=on?'var(--green)':'var(--yellow)';
+}
+async function submitMorn(){
+  const empId=document.getElementById('m-emp').value,date=document.getElementById('m-date').value,mode=document.getElementById('m-mode').value,login=document.getElementById('m-login').value,tplan=parseInt(document.getElementById('m-tplan').value)||0,tdesc=document.getElementById('m-tdesc').value.trim();
+  if(!empId||!date||!mode||!login){showToast('Please fill all required fields','error');return;}
+  if(!tdesc){showToast('Please describe your tasks for today','error');return;}
+  const emp=employees.find(e=>e.id===empId);
+  const rec={id:Date.now(),date,empId,empName:emp.name,team:emp.team,mode,loginTime:login,tasksPlanned:tplan,taskDesc:tdesc,onTime:isOT(login,emp.shift),submittedAt:new Date().toISOString()};
+  const xi=checkins.findIndex(c=>c.empId===empId&&c.date===date);
+  if(xi>=0)checkins[xi]=rec;else checkins.push(rec);
+  DB.set('tp_ci',checkins);
+  if(SCRIPT_URL){setSS('syncing','Saving...');const res=await gsPost({action:'saveCheckin',data:rec});setSS(res&&res.success?'ok':'err',res&&res.success?'Saved':'Sync error');if(!res||!res.success)showToast('Saved locally - Sheets sync failed','info');}
+  showToast('Check-in saved! '+emp.name+' - '+tplan+' tasks planned','success');clearMorn();
+}
+function clearMorn(){['m-emp','m-mode','m-tdesc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});['m-login','m-tplan'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});document.getElementById('m-team').value='';document.getElementById('m-otstatus').value='';document.getElementById('sched-m').textContent='9:00 AM - 9:15 AM';document.getElementById('sched-e').textContent='6:00 PM - 6:15 PM';}
+function onEodEmp(){
+  const empId=document.getElementById('e-emp').value,date=document.getElementById('e-date').value,emp=employees.find(e=>e.id===empId);
+  document.getElementById('e-team').value=emp?emp.team:'';
+  const ci=checkins.find(c=>c.empId===empId&&c.date===date),stEl=document.getElementById('eod-ci-status'),hintEl=document.getElementById('eod-task-hint');
+  if(ci){document.getElementById('e-login').value=ci.loginTime;document.getElementById('e-moded').value=ci.mode==='Remote'?'Remote':'Office';document.getElementById('e-tplan').value=ci.tasksPlanned;hintEl.style.display='block';hintEl.innerHTML='Tasks planned this morning: <strong>'+ci.tasksPlanned+'</strong><br><span style="color:var(--muted);font-size:12px;white-space:pre-wrap;">'+ci.taskDesc+'</span>';stEl.style.display='block';stEl.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;font-size:13px;"><span style="color:var(--green);font-weight:600;">Morning check-in found</span><span style="color:var(--muted);">- In at '+f12(ci.loginTime)+' - '+ci.tasksPlanned+' tasks planned</span></div>';}
+  else{document.getElementById('e-login').value='';document.getElementById('e-moded').value='';document.getElementById('e-tplan').value='';hintEl.style.display='none';stEl.style.display='block';stEl.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:8px;font-size:13px;"><span style="color:var(--yellow);">No morning check-in found.</span><span style="color:var(--muted);">Fill login time manually.</span></div>';}
+  updateCfy();
+}
+function updateCfy(){
+  const login=document.getElementById('e-login').value,logout=document.getElementById('e-logout').value,brk=parseFloat(document.getElementById('e-break').value)||0,cfy=parseFloat(document.getElementById('e-cfy').value),net=calcNet(login,logout,brk);
+  document.getElementById('e-sys').value=net>0?net.toFixed(2)+' hrs':'';
+  const dEl=document.getElementById('e-diff'),hEl=document.getElementById('e-diff-hint');
+  if(net>0&&!isNaN(cfy)){const d=cfy-net,ad=Math.abs(d);dEl.value=(d>=0?'+':'')+d.toFixed(2)+' hrs';if(ad<=.25){dEl.style.color='var(--green)';hEl.style.color='var(--green)';hEl.textContent='Great match! Times align with Clockify.';}else if(ad<=1){dEl.style.color='var(--yellow)';hEl.style.color='var(--yellow)';hEl.textContent='Small gap - double check break hours or timer.';}else{dEl.style.color='var(--red)';hEl.style.color='var(--red)';hEl.textContent='Large gap - verify Clockify timer and login/logout.';}}
+  else{dEl.value='';dEl.style.color='';hEl.style.color='var(--muted)';hEl.textContent='Enter Clockify hours to compare';}
+}
+async function submitEod(){
+  const empId=document.getElementById('e-emp').value,date=document.getElementById('e-date').value,logout=document.getElementById('e-logout').value;
+  if(!empId||!date||!logout){showToast('Please fill all required fields','error');return;}
+  const emp=employees.find(e=>e.id===empId),ci=checkins.find(c=>c.empId===empId&&c.date===date);
+  const login=document.getElementById('e-login').value||(ci?ci.loginTime:'09:00'),brk=parseFloat(document.getElementById('e-break').value)||0;
+  const r={id:Date.now(),date,empId,empName:emp.name,team:emp.team,manager:emp.manager,mode:ci?ci.mode:'Remote',loginTime:login,logoutTime:logout,breakHrs:brk,clockifyHrs:parseFloat(document.getElementById('e-cfy').value)||null,netHrs:calcNet(login,logout,brk),prodHrs:parseFloat(document.getElementById('e-prod').value)||0,meetHrs:parseFloat(document.getElementById('e-meet').value)||0,adminHrs:parseFloat(document.getElementById('e-admin').value)||0,tasksPlanned:parseInt(document.getElementById('e-tplan').value)||0,tasksDone:parseInt(document.getElementById('e-tdone').value)||0,taskDoneText:document.getElementById('e-tdonetext').value,pending:document.getElementById('e-pend').value,quality:getR('r-quality')||3,responsiveness:getR('r-resp')||3,ownership:getR('r-own')||3,blocker:document.getElementById('e-block').value,support:document.getElementById('e-support').value,tomorrow:document.getElementById('e-tmr').value,onTime:ci?ci.onTime:isOT(login,emp.shift),submittedAt:new Date().toISOString()};
+  r.score=calcScore(r);r.band=getBand(r.score);
+  const xi=reports.findIndex(x=>x.empId===empId&&x.date===date);
+  if(xi>=0)reports[xi]=r;else reports.push(r);DB.set('tp_rp',reports);
+  if(SCRIPT_URL){setSS('syncing','Saving...');const res=await gsPost({action:'saveEOD',data:r});setSS(res&&res.success?'ok':'err',res&&res.success?'Saved':'Sync error');if(!res||!res.success)showToast('Saved locally - Sheets sync failed','info');}
+  showToast('EOD submitted! Score: '+r.score+'/100 - '+r.band,'success');clearEod();
+}
+function clearEod(){['e-emp','e-tdonetext','e-pend','e-block','e-support','e-tmr'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});['e-logout','e-break','e-prod','e-meet','e-admin','e-tdone','e-cfy'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});['r-quality','r-resp','r-own'].forEach(id=>document.querySelectorAll('#'+id+' .rbtn').forEach(b=>b.classList.remove('sel')));document.getElementById('e-login').value='';document.getElementById('e-moded').value='';document.getElementById('e-tplan').value='';document.getElementById('e-team').value='';document.getElementById('eod-ci-status').style.display='none';document.getElementById('eod-task-hint').style.display='none';updateCfy();}
+
+function renderDash(){
+  const date=document.getElementById('admin-date').value,team=document.getElementById('admin-team').value;
+  const dCIs=checkins.filter(c=>c.date===date&&(!team||c.team===team));
+  const dEODs=reports.filter(r=>r.date===date&&(!team||r.team===team));
+  const activeEmps=employees.filter(e=>e.status==='Active'&&(!team||e.team===team));
+  const otCnt=dCIs.filter(c=>c.onTime).length;
+  document.getElementById('mk-in').textContent=dCIs.length;document.getElementById('mk-ot').textContent=otCnt;document.getElementById('mk-late').textContent=dCIs.length-otCnt;document.getElementById('mk-miss').textContent=Math.max(0,activeEmps.length-dCIs.length);document.getElementById('mk-updated').textContent='Updated: '+new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true});
+  const grid=document.getElementById('morning-grid');grid.innerHTML='';
+  if(!dCIs.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:36px 20px;color:var(--muted);">No morning check-ins yet for this date.</div>';}
+  else{dCIs.sort((a,b)=>a.loginTime.localeCompare(b.loginTime)).forEach(ci=>{const eod=reports.find(r=>r.empId===ci.empId&&r.date===date);const lines=ci.taskDesc.split('\n').filter(l=>l.trim());grid.innerHTML+='<div class="mcard"><div style="font-weight:600;font-size:14px;margin-bottom:2px;">'+ci.empName+'</div><div style="font-size:11px;color:var(--muted);margin-bottom:8px;">'+ci.team+' - '+(ci.mode==='Remote'?'Remote':'Office')+' - In '+f12(ci.loginTime)+' '+(ci.onTime?'<span style="color:var(--green)">On Time</span>':'<span style="color:var(--yellow)">Late</span>')+'</div><div style="font-size:13px;line-height:1.7;">'+lines.slice(0,5).map(t=>'<div style="display:flex;gap:6px;"><span style="color:var(--accent);flex-shrink:0;">></span><span>'+t+'</span></div>').join('')+(lines.length>5?'<div style="font-size:11px;color:var(--muted);margin-top:2px;">+'+(lines.length-5)+' more...</div>':'')+'</div><div style="margin-top:9px;padding-top:9px;border-top:1px solid var(--border);display:flex;align-items:center;"><span style="font-size:11px;color:var(--muted);">'+ci.tasksPlanned+' task'+(ci.tasksPlanned!==1?'s':'')+' planned</span><div style="flex:1;"></div><span class="sbadge '+(eod?'sb-done':'sb-pend')+'">'+(eod?'EOD Done':'EOD Pending')+'</span></div></div>';});}
+  document.getElementById('att-body').innerHTML=activeEmps.sort((a,b)=>a.name.localeCompare(b.name)).map(emp=>{const ci=dCIs.find(c=>c.empId===emp.id),eod=dEODs.find(r=>r.empId===emp.id);return '<tr><td><strong>'+emp.name+'</strong></td><td>'+emp.team+'</td><td>'+(ci?ci.mode:'--')+'</td><td>'+(ci?f12(ci.loginTime):'<span style="color:var(--muted)">Not checked in</span>')+'</td><td>'+(ci?(ci.onTime?'<span style="color:var(--green)">On Time</span>':'<span style="color:var(--yellow)">Late</span>'):'--')+'</td><td>'+(ci?ci.tasksPlanned+' tasks':'--')+'</td><td><span class="sbadge '+(eod?'sb-done':ci?'sb-pend':'sb-none')+'">'+(eod?'EOD Done':ci?'EOD Pending':'Not Checked In')+'</span></td></tr>';}).join('');
+  const sorted=[...dEODs].sort((a,b)=>b.score-a.score);
+  document.getElementById('k-present').textContent=dEODs.length;document.getElementById('k-avg').textContent=dEODs.length?(dEODs.reduce((s,r)=>s+r.score,0)/dEODs.length).toFixed(1):'-';document.getElementById('k-comp').textContent=dEODs.length?Math.round(dEODs.filter(r=>r.loginTime&&r.logoutTime&&r.tasksPlanned>0).length/dEODs.length*100)+'%':'0%';document.getElementById('k-blk').textContent=dEODs.filter(r=>r.blocker&&r.blocker.trim()).length;
+  document.getElementById('top-perf').innerHTML=sorted.length?sorted.slice(0,5).map((r,i)=>'<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);"><span style="font-size:17px;">'+['1st','2nd','3rd','4th','5th'][i]+'</span><div><div style="font-weight:500;">'+r.empName+'</div><div style="font-size:11px;color:var(--muted);">'+r.team+'</div></div><div style="margin-left:auto;text-align:right;"><span style="font-weight:700;color:var(--green)">'+r.score+'</span><span class="'+bCls(r.band)+'" style="display:block;margin-top:2px;">'+r.band+'</span></div></div>').join(''):'<p style="color:var(--muted);font-size:13px;">No EOD submissions yet.</p>';
+  const watch=sorted.filter(r=>r.score<65||(r.blocker&&r.blocker.trim()));document.getElementById('watch-list').innerHTML=watch.length?watch.slice(0,5).map(r=>{const rs=[];if(r.score<50)rs.push('Low score');if(r.blocker&&r.blocker.trim())rs.push('Blocker');if(r.tasksPlanned>0&&r.tasksDone<r.tasksPlanned*.5)rs.push('Low tasks');return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);"><div><div style="font-weight:500;">'+r.empName+'</div><div style="font-size:11px;color:var(--yellow);">'+rs.join(' - ')+'</div></div><div style="margin-left:auto;"><strong style="color:var(--red)">'+r.score+'</strong></div></div>';}).join(''):'<p style="color:var(--green);font-size:13px;">All performing well!</p>';
+  document.getElementById('snap-body').innerHTML=sorted.map(r=>{const diff=r.clockifyHrs!=null?(r.clockifyHrs-r.netHrs):null,ad=diff!=null?Math.abs(diff):null,dc=ad!=null?(ad<=.25?'var(--green)':ad<=1?'var(--yellow)':'var(--red)'):'var(--muted)';return '<tr><td><strong>'+r.empName+'</strong></td><td>'+r.team+'</td><td>'+r.mode+'</td><td>'+f12(r.loginTime)+'</td><td>'+f12(r.logoutTime)+'</td><td>'+(r.netHrs?r.netHrs.toFixed(1):'0')+'h</td><td>'+(r.clockifyHrs!=null?'<span style="color:#ff8a65;font-weight:600;">'+r.clockifyHrs.toFixed(1)+'h</span>':'--')+'</td><td><span style="color:'+dc+';font-weight:600;">'+(diff!=null?(diff>=0?'+':'')+diff.toFixed(2)+'h':'--')+'</span></td><td>'+r.tasksDone+'/'+r.tasksPlanned+'</td><td><strong style="color:'+(r.score>=80?'var(--green)':r.score>=65?'var(--accent)':r.score>=50?'var(--yellow)':'var(--red)')+'">'+r.score+'</strong></td><td><span class="'+bCls(r.band)+'">'+r.band+'</span></td></tr>';}).join('')||'<tr><td colspan="11" style="text-align:center;color:var(--muted);padding:26px;">No EOD data for this date.</td></tr>';
+  document.getElementById('log-m-body').innerHTML=[...checkins].filter(c=>!team||c.team===team).reverse().map(c=>'<tr><td>'+c.date+'</td><td>'+c.empName+'</td><td>'+c.team+'</td><td>'+c.mode+'</td><td>'+f12(c.loginTime)+'</td><td>'+(c.onTime?'<span style="color:var(--green)">Yes</span>':'<span style="color:var(--yellow)">Late</span>')+'</td><td>'+c.tasksPlanned+'</td><td style="max-width:250px;white-space:pre-wrap;font-size:12px;line-height:1.5;">'+c.taskDesc+'</td></tr>').join('')||'<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">No check-ins yet.</td></tr>';
+  document.getElementById('log-e-body').innerHTML=[...reports].filter(r=>!team||r.team===team).reverse().map(r=>{const diff=r.clockifyHrs!=null?(r.clockifyHrs-r.netHrs):null;return '<tr><td>'+r.date+'</td><td>'+r.empName+'</td><td>'+r.team+'</td><td>'+f12(r.logoutTime)+'</td><td>'+(r.netHrs?r.netHrs.toFixed(1):'0')+'h</td><td>'+(r.clockifyHrs!=null?r.clockifyHrs.toFixed(1)+'h':'--')+'</td><td>'+(diff!=null?(diff>=0?'+':'')+diff.toFixed(2)+'h':'--')+'</td><td>'+r.tasksDone+'/'+r.tasksPlanned+'</td><td>'+r.quality+'</td><td>'+r.responsiveness+'</td><td>'+r.ownership+'</td><td><strong>'+r.score+'</strong></td><td><span class="'+bCls(r.band)+'">'+r.band+'</span></td><td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+(r.blocker||'--')+'</td></tr>';}).join('')||'<tr><td colspan="14" style="text-align:center;color:var(--muted);padding:20px;">No EOD reports yet.</td></tr>';
+  document.getElementById('manage-body').innerHTML=dEODs.map(r=>'<tr><td>'+r.date+'</td><td>'+r.empName+'</td><td><select onchange="updScore('+r.id+',\'quality\',this.value)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;">'+ [1,2,3,4,5].map(v=>'<option '+(r.quality==v?'selected':'')+' value="'+v+'">'+v+'</option>').join('')+'</select></td><td><select onchange="updScore('+r.id+',\'responsiveness\',this.value)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;">'+ [1,2,3,4,5].map(v=>'<option '+(r.responsiveness==v?'selected':'')+' value="'+v+'">'+v+'</option>').join('')+'</select></td><td><select onchange="updScore('+r.id+',\'ownership\',this.value)" style="background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 8px;">'+ [1,2,3,4,5].map(v=>'<option '+(r.ownership==v?'selected':'')+' value="'+v+'">'+v+'</option>').join('')+'</select></td><td><strong id="ms-'+r.id+'">'+r.score+'</strong></td><td><button class="btn btn-danger" style="padding:5px 11px;font-size:11px;" onclick="delRep('+r.id+')">Delete</button></td></tr>').join('')||'<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px;">No submissions for this date.</td></tr>';
+  renderCharts(dEODs);
+}
+async function updScore(id,field,val){const r=reports.find(x=>x.id===id);if(!r)return;r[field]=parseInt(val);r.score=calcScore(r);r.band=getBand(r.score);DB.set('tp_rp',reports);const el=document.getElementById('ms-'+id);if(el)el.textContent=r.score;if(SCRIPT_URL){const res=await gsPost({action:'updateScore',data:{id,quality:r.quality,responsiveness:r.responsiveness,ownership:r.ownership,score:r.score,band:r.band}});showToast(res&&res.success?'Score updated and synced':'Score updated locally','success');}else showToast('Score updated!','success');}
+async function delRep(id){if(!confirm('Delete this EOD report?'))return;reports=reports.filter(r=>r.id!==id);DB.set('tp_rp',reports);if(SCRIPT_URL)await gsPost({action:'deleteReport',data:{id}});renderDash();}
+function clearAll(){if(!confirm('Delete ALL local data? Google Sheets data is preserved.'))return;checkins=[];reports=[];DB.set('tp_ci',checkins);DB.set('tp_rp',reports);renderDash();showToast('Local data cleared. Refresh to reload from Sheets.','info');}
+
+function exportCSV(type){
+  let rows=[],filename='';
+  const date=document.getElementById('admin-date').value,team=document.getElementById('admin-team').value;
+  if(type==='eod'){filename='EOD_Reports_'+date+'.csv';rows=[['Date','Employee','Team','Mode','Login','Logout','Sys Hrs','Clockify Hrs','Diff','Tasks Planned','Tasks Done','Completion%','Quality','Responsiveness','Ownership','Score','Band','Blockers','Plan Tomorrow']];reports.filter(r=>!team||r.team===team).forEach(r=>{const diff=r.clockifyHrs!=null?(r.clockifyHrs-r.netHrs).toFixed(2):'',pct=r.tasksPlanned>0?Math.round(r.tasksDone/r.tasksPlanned*100)+'%':'0%';rows.push([r.date,r.empName,r.team,r.mode,r.loginTime,r.logoutTime,r.netHrs?r.netHrs.toFixed(2):'0',r.clockifyHrs!=null?r.clockifyHrs:'',diff,r.tasksPlanned,r.tasksDone,pct,r.quality,r.responsiveness,r.ownership,r.score,r.band,'"'+(r.blocker||'').replace(/"/g,'""')+'"','"'+(r.tomorrow||'').replace(/"/g,'""')+'"']);});}
+  else if(type==='checkins'){filename='CheckIns_'+date+'.csv';rows=[['Date','Employee','Team','Mode','Login Time','On Time','Tasks Planned','Task Description']];checkins.filter(c=>!team||c.team===team).forEach(c=>{rows.push([c.date,c.empName,c.team,c.mode,c.loginTime,c.onTime?'Yes':'No',c.tasksPlanned,'"'+(c.taskDesc||'').replace(/"/g,'""')+'"']);});}
+  else if(type==='monthly'){filename='Monthly_Summary_'+new Date().toISOString().slice(0,7)+'.csv';const byEmp={};reports.forEach(r=>{if(!byEmp[r.empName])byEmp[r.empName]={name:r.empName,team:r.team,rows:[]};byEmp[r.empName].rows.push(r);});rows=[['Employee','Team','Days Worked','Avg Score','Avg Clockify Hrs/Day','Total Tasks Planned','Total Tasks Done','Completion%','Avg Quality','Avg Responsiveness','Avg Ownership']];Object.values(byEmp).forEach(emp=>{const rs=emp.rows,avg=v=>rs.reduce((s,r)=>s+(parseFloat(r[v])||0),0)/rs.length,sum=v=>rs.reduce((s,r)=>s+(parseFloat(r[v])||0),0),pct=sum('tasksPlanned')>0?Math.round(sum('tasksDone')/sum('tasksPlanned')*100)+'%':'0%';rows.push([emp.name,emp.team,rs.length,avg('score').toFixed(1),(sum('clockifyHrs')/rs.length).toFixed(1),sum('tasksPlanned'),sum('tasksDone'),pct,avg('quality').toFixed(1),avg('responsiveness').toFixed(1),avg('ownership').toFixed(1)]);});}
+  else{filename='TeamPulse_Full_Export_'+new Date().toISOString().slice(0,10)+'.csv';rows=[['MORNING CHECK-INS']];rows.push(['Date','Employee','Team','Mode','Login','On Time','Tasks Planned','Task Description']);checkins.forEach(c=>rows.push([c.date,c.empName,c.team,c.mode,c.loginTime,c.onTime?'Yes':'No',c.tasksPlanned,'"'+(c.taskDesc||'').replace(/"/g,'""')+'"']));rows.push([]);rows.push(['EOD REPORTS']);rows.push(['Date','Employee','Team','Mode','Login','Logout','Sys Hrs','Clockify','Score','Band','Blocker']);reports.forEach(r=>rows.push([r.date,r.empName,r.team,r.mode,r.loginTime,r.logoutTime,r.netHrs?r.netHrs.toFixed(2):'0',r.clockifyHrs!=null?r.clockifyHrs:'',r.score,r.band,'"'+(r.blocker||'').replace(/"/g,'""')+'"']));}
+  const csv=rows.map(r=>r.join(',')).join('\n'),blob=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=filename;a.click();showToast(filename+' downloaded!','success');
+}
+
+let CI2={};
+function dChart(id){if(CI2[id]){CI2[id].destroy();delete CI2[id];}}
+function renderCharts(data){
+  if(!data){const date=document.getElementById('admin-date').value,team=document.getElementById('admin-team').value;data=reports.filter(r=>r.date===date&&(!team||r.team===team));}
+  const sorted=[...data].sort((a,b)=>b.score-a.score),lbs=sorted.map(r=>r.empName.split(' ')[0]);
+  dChart('ch-scores');if(document.getElementById('ch-scores')){CI2['ch-scores']=new Chart(document.getElementById('ch-scores'),{type:'bar',data:{labels:lbs,datasets:[{label:'Score',data:sorted.map(r=>r.score),backgroundColor:sorted.map(r=>r.score>=80?'#22c55e':r.score>=65?'#4f8ef7':r.score>=50?'#f59e0b':'#ef4444'),borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{color:'#6b7a99'},grid:{color:'#1f2940'}},x:{ticks:{color:'#6b7a99'},grid:{display:false}}}}});}
+  dChart('ch-time');const ps=data.reduce((s,r)=>s+(r.prodHrs||0),0),ms=data.reduce((s,r)=>s+(r.meetHrs||0),0),as=data.reduce((s,r)=>s+(r.adminHrs||0),0);if(document.getElementById('ch-time')){CI2['ch-time']=new Chart(document.getElementById('ch-time'),{type:'doughnut',data:{labels:['Productive','Meetings','Admin'],datasets:[{data:[ps.toFixed(1),ms.toFixed(1),as.toFixed(1)],backgroundColor:['#22c55e','#4f8ef7','#f59e0b'],borderWidth:0,hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#e8eaf2',padding:14}}}}});}
+  dChart('ch-tasks');if(document.getElementById('ch-tasks')){CI2['ch-tasks']=new Chart(document.getElementById('ch-tasks'),{type:'bar',data:{labels:lbs,datasets:[{label:'Planned',data:sorted.map(r=>r.tasksPlanned),backgroundColor:'#1f2940',borderRadius:4},{label:'Completed',data:sorted.map(r=>r.tasksDone),backgroundColor:'#22c55e',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#e8eaf2'}}},scales:{y:{ticks:{color:'#6b7a99'},grid:{color:'#1f2940'}},x:{ticks:{color:'#6b7a99'},grid:{display:false}}}}});}
+  dChart('ch-band');const bc={Excellent:0,Good:0,Acceptable:0,Watch:0};data.forEach(r=>{if(bc[r.band]!==undefined)bc[r.band]++;});if(document.getElementById('ch-band')){CI2['ch-band']=new Chart(document.getElementById('ch-band'),{type:'pie',data:{labels:Object.keys(bc),datasets:[{data:Object.values(bc),backgroundColor:['#22c55e','#4f8ef7','#f59e0b','#ef4444'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:'#e8eaf2',padding:12}}}}});}
+  dChart('ch-cfy');const cfyD=sorted.filter(r=>r.clockifyHrs!=null);if(document.getElementById('ch-cfy')){CI2['ch-cfy']=new Chart(document.getElementById('ch-cfy'),{type:'bar',data:{labels:cfyD.map(r=>r.empName.split(' ')[0]),datasets:[{label:'System Hrs',data:cfyD.map(r=>r.netHrs?r.netHrs.toFixed(2):0),backgroundColor:'#4f8ef7',borderRadius:4},{label:'Clockify Hrs',data:cfyD.map(r=>r.clockifyHrs.toFixed(2)),backgroundColor:'#ff5722',borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#e8eaf2'}}},scales:{y:{ticks:{color:'#6b7a99'},grid:{color:'#1f2940'}},x:{ticks:{color:'#6b7a99'},grid:{display:false}}}}});}
+  dChart('ch-mode');if(document.getElementById('ch-mode')){CI2['ch-mode']=new Chart(document.getElementById('ch-mode'),{type:'bar',data:{labels:['Remote','Office'],datasets:[{label:'Employees',data:[data.filter(r=>r.mode==='Remote').length,data.filter(r=>r.mode==='Office').length],backgroundColor:['#7c3aed','#4f8ef7'],borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b7a99'},grid:{color:'#1f2940'}},y:{ticks:{color:'#6b7a99'},grid:{display:false}}}}});}
+}
+
+function renderEmps(){document.getElementById('emp-count').textContent=employees.length;document.getElementById('emp-list').innerHTML=employees.map(e=>'<div style="display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 13px;"><div style="width:32px;height:32px;border-radius:50%;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">'+e.name[0]+'</div><div style="flex:1;min-width:0;"><div style="font-weight:500;font-size:13px;">'+e.name+'</div><div style="font-size:11px;color:var(--muted);">'+e.id+' - '+e.team+' - Shift '+(e.shift||'09:00')+'</div></div><span style="font-size:11px;padding:2px 8px;border-radius:99px;background:'+(e.status==='Active'?'#14532d':'#3b0764')+';color:'+(e.status==='Active'?'#86efac':'#d8b4fe')+';">'+e.status+'</span><button onclick="removeEmp(\''+e.id+'\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:15px;">X</button></div>').join('');}
+async function addEmp(){const name=document.getElementById('en-name').value.trim();if(!name){showToast('Please enter a name','error');return;}const ids=employees.map(e=>parseInt(e.id.replace('E',''))).filter(n=>!isNaN(n)),next=ids.length?Math.max(...ids)+1:1,id=document.getElementById('en-id').value.trim()||('E'+String(next).padStart(3,'0'));const emp={id,name,team:document.getElementById('en-team').value,manager:document.getElementById('en-mgr').value.trim()||'Manager',shift:document.getElementById('en-shift').value||'09:00',status:'Active'};employees.push(emp);DB.set('tp_emps',employees);if(SCRIPT_URL){const res=await gsPost({action:'saveEmployee',data:emp});if(!res||!res.success)showToast('Added locally - Sheets sync failed','info');}renderEmps();populateDDs();document.getElementById('en-name').value='';document.getElementById('en-id').value='';showToast(name+' added!','success');}
+function removeEmp(id){if(!confirm('Remove this employee?'))return;employees=employees.filter(e=>e.id!==id);DB.set('tp_emps',employees);renderEmps();populateDDs();}
+
+function showToast(msg,type){const t=document.getElementById('toast');t.textContent=msg;t.className='show '+(type||'success');clearTimeout(t._tm);t._tm=setTimeout(()=>t.classList.remove('show'),3500);}
+function showLoader(msg){document.getElementById('loader').classList.remove('hidden');document.getElementById('loader-msg').textContent=msg||'Loading...';}
+function hideLoader(){document.getElementById('loader').classList.add('hidden');}
+
+init();
+</script>
+</body>
+</html>
