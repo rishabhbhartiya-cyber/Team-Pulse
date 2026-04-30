@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -118,9 +117,137 @@ code{background:rgba(79,142,247,.12);color:#93c5fd;padding:2px 6px;border-radius
 .rf{display:flex;gap:7px;align-items:center;flex-wrap:wrap;} .sp{flex:1;}
 canvas{width:100% !important;}
 @media(max-width:660px){.c4{grid-template-columns:repeat(2,1fr);}.c3,.c2{grid-template-columns:1fr;}nav{padding:10px 12px;}.view{padding:12px;}}
+
+/* ══ THEME: Morning (bright) ══ */
+body.theme-morning {
+  --bg:#f0f9ff; --sur:#ffffff; --card:#f8faff; --bdr:#c7d9f0;
+  --acc:#0ea5e9; --acc2:#8b5cf6; --grn:#16a34a; --yel:#d97706;
+  --red:#dc2626; --txt:#0f172a; --mut:#64748b;
+}
+body.theme-morning nav { background:#fff; border-bottom:2px solid #bae6fd; }
+body.theme-morning .card { box-shadow:0 2px 8px rgba(14,165,233,.08); }
+body.theme-morning .f input,body.theme-morning .f select,body.theme-morning .f textarea {
+  background:#f1f5f9; border-color:#cbd5e1; color:#0f172a;
+}
+body.theme-morning .f input:focus,body.theme-morning .f select:focus,body.theme-morning .f textarea:focus { border-color:#0ea5e9; }
+body.theme-morning .f select option { background:#f1f5f9; color:#0f172a; }
+body.theme-morning .rb { background:#e0f2fe; border-color:#bae6fd; color:#0369a1; }
+body.theme-morning .rb.on { background:#0ea5e9; border-color:#0ea5e9; color:#fff; }
+body.theme-morning th { background:#f1f5f9; color:#475569; }
+body.theme-morning td { border-color:#e2e8f0; }
+body.theme-morning tr:hover td { background:rgba(14,165,233,.06); }
+body.theme-morning .nt { color:#64748b; }
+body.theme-morning .nt.on { background:#0ea5e9; color:#fff; }
+body.theme-morning .nt:hover:not(.on) { background:#e0f2fe; color:#0369a1; }
+body.theme-morning .mc { background:#f1f5f9; border-color:#cbd5e1; }
+body.theme-morning #ldr { background:rgba(240,249,255,.92); }
+body.theme-morning input[type=date]::-webkit-calendar-picker-indicator,
+body.theme-morning input[type=time]::-webkit-calendar-picker-indicator { filter:none; opacity:.5; }
+
+/* ══ QUOTE BANNER ══ */
+#quote-banner {
+  display:none;
+  padding:14px 22px;
+  margin:0;
+  border-bottom:1px solid var(--bdr);
+  font-size:13px;
+  text-align:center;
+  transition:all .3s;
+}
+#quote-banner.morning-quote {
+  background:linear-gradient(90deg,#fef3c7,#d1fae5,#dbeafe);
+  color:#1e3a5f;
+  border-bottom:1px solid #bae6fd;
+}
+#quote-banner.evening-quote {
+  background:linear-gradient(90deg,#1e1b4b,#1e3a5f,#1a1a2e);
+  color:#c7d2fe;
+  border-bottom:1px solid #2d2d5e;
+}
+#quote-banner .qname { font-weight:700; }
+#quote-banner .qtext { font-style:italic; margin-right:6px; }
+#quote-banner .qwelcome { font-weight:700; margin-right:8px; font-size:14px; }
+
+/* ══ LOGIN SCREEN ══ */
+#login-screen {
+  position:fixed;inset:0;z-index:10000;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+}
+#login-screen.h { display:none; }
+.login-box {
+  background:var(--card);
+  border:1px solid var(--bdr);
+  border-radius:16px;
+  padding:36px 32px;
+  width:100%;max-width:400px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.login-logo { font-family:'Syne',sans-serif;font-weight:800;font-size:28px;text-align:center;margin-bottom:4px; }
+.login-logo span { color:var(--acc); }
+.login-sub { text-align:center;color:var(--mut);font-size:13px;margin-bottom:24px; }
+.login-field { margin-bottom:14px; }
+.login-field label { display:block;font-size:11px;color:var(--mut);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;font-weight:500; }
+.login-field input, .login-field select {
+  width:100%;background:var(--sur);border:1px solid var(--bdr);
+  border-radius:8px;padding:10px 13px;color:var(--txt);
+  font-family:'DM Sans',sans-serif;font-size:14px;outline:none;
+  transition:border .2s;
+}
+.login-field input:focus,.login-field select:focus { border-color:var(--acc); }
+.login-field select option { background:var(--sur); color:var(--txt); }
+.login-btn {
+  width:100%;padding:12px;border-radius:9px;border:none;
+  background:var(--acc);color:#fff;font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:6px;
+}
+.login-btn:hover { background:#3b7ef5; }
+.login-err { color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:18px; }
+.login-role-hint { font-size:11px;color:var(--mut);text-align:center;margin-top:10px; }
+
+/* ══ ROLE BADGES ══ */
+.role-badge {
+  padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;
+}
+.role-emp { background:rgba(79,142,247,.15);color:#93c5fd;border:1px solid rgba(79,142,247,.3); }
+.role-mgr { background:rgba(124,58,237,.15);color:#c4b5fd;border:1px solid rgba(124,58,237,.3); }
+
+/* ══ MANAGER-ONLY INDICATOR ══ */
+.mgr-only { display:none; }
+body.is-manager .mgr-only { display:flex; }
+body.is-manager .mgr-only-inline { display:inline-block; }
+.mgr-only-inline { display:none; }
+
 </style>
 </head>
 <body>
+
+<!-- ════ LOGIN SCREEN ════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Team<span>Pulse</span></div>
+    <div class="login-sub">Daily work tracker · Sign in to continue</div>
+    <div class="login-field">
+      <label>Select Your Name</label>
+      <select id="login-emp-sel">
+        <option value="">-- Select Employee --</option>
+        <option value="__manager__">🔐 Manager / Admin Login</option>
+      </select>
+    </div>
+    <div id="login-pin-wrap" class="login-field" style="display:none;">
+      <label>Manager PIN</label>
+      <input type="password" id="login-pin" placeholder="Enter manager PIN" maxlength="6">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="login-err"></div>
+    <div class="login-role-hint" id="login-role-hint">Employees select their name · Manager enters PIN</div>
+  </div>
+</div>
+
+<!-- ════ QUOTE BANNER ════ -->
+<div id="quote-banner"></div>
+
 <div id="ldr"><div class="spin"></div><div class="lmsg" id="lmsg">Loading TeamPulse...</div></div>
 
 <nav>
@@ -128,14 +255,21 @@ canvas{width:100% !important;}
   <div class="ntabs">
     <button class="nt on"  onclick="sv('morning')">☀️ Morning Check-In</button>
     <button class="nt" onclick="sv('eod')">🌙 EOD Report</button>
-    <button class="nt" onclick="sv('admin')">📊 Manager Dashboard</button>
-    <button class="nt" onclick="sv('employees')">👥 Team Setup</button>
-    <button class="nt" onclick="sv('setup')">⚙️ DB Setup</button>
+    <button class="nt mgr-only" onclick="sv('admin')">📊 Manager Dashboard</button>
+    <button class="nt mgr-only" onclick="sv('employees')">👥 Team Setup</button>
+    <button class="nt mgr-only" onclick="sv('setup')">⚙️ DB Setup</button>
   </div>
   <div class="sync-wrap">
     <div class="sdot busy" id="sdot"></div>
     <span class="slbl" id="slbl">Connecting...</span>
   </div>
+
+  <div id="user-badge-wrap" style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+    <span id="user-badge-name" style="font-size:12px;font-weight:500;color:var(--txt);"></span>
+    <span id="user-role-badge" class="role-badge role-emp"></span>
+    <button onclick="doLogout()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:4px 10px;color:var(--mut);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;" title="Sign out">Sign Out</button>
+  </div>
+
 </nav>
 
 <!-- ════ DB SETUP ═══════════════════════════════════════════ -->
@@ -508,7 +642,7 @@ function loadAll() {
       lastSyn = new Date().toLocaleTimeString();
       DB.set('tp_ls', lastSyn);
       setSS('ok', 'Synced ✓');
-      popDDs(); renderD();
+      popDDs(); renderD(); initLoginDropdown();
       updSetupStatus();
       toast('✅ Synced from Google Sheets!', 's');
     })
@@ -633,6 +767,29 @@ function init(){
 
   // Load cached data immediately for instant render
   if(emps.length>0){popDDs();renderD();}
+
+
+  // Restore session
+  var savedUser = DB.get('tp_cu');
+  if (savedUser && savedUser.id) {
+    // Validate saved employee still exists
+    if (savedUser.role === 'employee') {
+      var stillExists = emps.find(function(e){ return e.id === savedUser.id; });
+      if (!stillExists && emps.length > 0) { savedUser = null; DB.set('tp_cu', null); }
+    }
+  }
+
+  // Init login dropdown after emps loaded
+  initLoginDropdown();
+  applyTheme();
+
+  if (savedUser && savedUser.id) {
+    currentUser = savedUser;
+    document.getElementById('login-screen').classList.add('h');
+    applySession();
+  } else {
+    hideLdr();
+  }
 
   if(GAS_URL){
     loadAll();
@@ -918,6 +1075,188 @@ function hideLdr(){document.getElementById('ldr').classList.add('h');}
 // ══════════════════════════════════════════════════
 //  START
 // ══════════════════════════════════════════════════
+
+// ══════════════════════════════════════════════════
+//  AUTH — login / logout / roles
+// ══════════════════════════════════════════════════
+var MANAGER_PIN = '1234'; // Change this to your desired PIN
+var currentUser  = null;  // { id, name, team, role: 'employee'|'manager' }
+
+function initLoginDropdown() {
+  var sel = document.getElementById('login-emp-sel');
+  // Clear existing employee options (keep first two: blank + manager)
+  while (sel.options.length > 2) sel.remove(2);
+  emps.filter(function(e){ return e.status === 'Active'; })
+    .sort(function(a,b){ return a.name.localeCompare(b.name); })
+    .forEach(function(e) {
+      var o = document.createElement('option');
+      o.value = e.id;
+      o.textContent = e.name + ' (' + e.team + ')';
+      sel.appendChild(o);
+    });
+}
+
+document.getElementById('login-emp-sel').addEventListener('change', function() {
+  var pinWrap = document.getElementById('login-pin-wrap');
+  pinWrap.style.display = this.value === '__manager__' ? 'block' : 'none';
+  document.getElementById('login-err').textContent = '';
+  if (this.value !== '__manager__') document.getElementById('login-pin').value = '';
+});
+
+document.getElementById('login-pin').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+function doLogin() {
+  var sel  = document.getElementById('login-emp-sel');
+  var val  = sel.value;
+  var err  = document.getElementById('login-err');
+  err.textContent = '';
+
+  if (!val) { err.textContent = 'Please select your name or manager login.'; return; }
+
+  if (val === '__manager__') {
+    var pin = document.getElementById('login-pin').value.trim();
+    if (pin !== MANAGER_PIN) { err.textContent = 'Incorrect PIN. Please try again.'; return; }
+    currentUser = { id: '__manager__', name: 'Manager', team: 'Management', role: 'manager' };
+  } else {
+    var emp = emps.find(function(e){ return e.id === val; });
+    if (!emp) { err.textContent = 'Employee not found. Contact your manager.'; return; }
+    currentUser = { id: emp.id, name: emp.name, team: emp.team, role: 'employee' };
+  }
+
+  DB.set('tp_cu', currentUser);
+  applySession();
+  document.getElementById('login-screen').classList.add('h');
+}
+
+function doLogout() {
+  currentUser = null;
+  DB.set('tp_cu', null);
+  // Reset UI
+  document.body.classList.remove('is-manager');
+  document.getElementById('login-screen').classList.remove('h');
+  document.getElementById('login-emp-sel').value = '';
+  document.getElementById('login-pin').value = '';
+  document.getElementById('login-pin-wrap').style.display = 'none';
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('quote-banner').style.display = 'none';
+  // Auto-fill morning name if employee just logged out and comes back
+}
+
+function applySession() {
+  if (!currentUser) return;
+
+  // User badge
+  document.getElementById('user-badge-name').textContent = currentUser.name;
+  var roleBadge = document.getElementById('user-role-badge');
+  if (currentUser.role === 'manager') {
+    roleBadge.textContent = '👑 Manager';
+    roleBadge.className = 'role-badge role-mgr';
+    document.body.classList.add('is-manager');
+  } else {
+    roleBadge.textContent = '👤 Employee';
+    roleBadge.className = 'role-badge role-emp';
+    document.body.classList.remove('is-manager');
+  }
+
+  // Auto-select employee in forms
+  if (currentUser.role === 'employee') {
+    var mSel = document.getElementById('m-emp');
+    var eSel = document.getElementById('e-emp');
+    if (mSel) { mSel.value = currentUser.id; onME(); }
+    if (eSel) { eSel.value = currentUser.id; onEE(); }
+  }
+
+  applyTheme();
+  showQuote();
+
+  // Show correct default view
+  if (currentUser.role === 'manager') {
+    sv('admin');
+  } else {
+    var hr = new Date().getHours();
+    sv(hr >= 15 ? 'eod' : 'morning');
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  THEME — morning bright / evening dark
+// ══════════════════════════════════════════════════
+function applyTheme() {
+  var hr = new Date().getHours();
+  var isMorning = (hr >= 5 && hr < 15); // 5am–3pm = morning theme
+  if (isMorning) {
+    document.body.classList.add('theme-morning');
+  } else {
+    document.body.classList.remove('theme-morning');
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  QUOTES — morning welcome / evening appreciation
+// ══════════════════════════════════════════════════
+var MORNING_QUOTES = [
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "Success is the sum of small efforts repeated day in and day out.", author: "Robert Collier" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "Do something today that your future self will thank you for.", author: "Sean Patrick Flanery" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+  { text: "Great things are done by a series of small things brought together.", author: "Vincent van Gogh" },
+  { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+];
+var EVENING_QUOTES = [
+  { text: "You are stronger than you think. Rest well — tomorrow is a new canvas.", author: "TeamPulse" },
+  { text: "Every day you show up is a win. Be proud of what you accomplished today.", author: "TeamPulse" },
+  { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
+  { text: "The harder you work for something, the greater you'll feel when you achieve it.", author: "TeamPulse" },
+  { text: "Don't count the days, make the days count.", author: "Muhammad Ali" },
+  { text: "Success isn't always about greatness. It's about consistency.", author: "Dwayne Johnson" },
+  { text: "You've done more today than you realize. Log off with pride.", author: "TeamPulse" },
+  { text: "Each evening brings an end. Each morning brings new hope.", author: "TeamPulse" },
+];
+
+function showQuote() {
+  if (!currentUser) return;
+  var hr = new Date().getHours();
+  var isMorning = (hr >= 5 && hr < 15);
+  var banner = document.getElementById('quote-banner');
+  var name = currentUser.name.split(' ')[0];
+
+  var q;
+  if (isMorning) {
+    q = MORNING_QUOTES[Math.floor(Math.random() * MORNING_QUOTES.length)];
+    banner.className = 'morning-quote';
+    banner.innerHTML =
+      '<span class="qwelcome">☀️ Good morning, ' + name + '!</span>' +
+      '<span class="qtext">"' + q.text + '"</span>' +
+      '<span class="qname">— ' + q.author + '</span>';
+  } else {
+    q = EVENING_QUOTES[Math.floor(Math.random() * EVENING_QUOTES.length)];
+    banner.className = 'evening-quote';
+    banner.innerHTML =
+      '<span class="qwelcome">🌙 Great work today, ' + name + '!</span>' +
+      '<span class="qtext">"' + q.text + '"</span>' +
+      '<span class="qname">— ' + q.author + '</span>';
+  }
+  banner.style.display = 'block';
+}
+
+// ══════════════════════════════════════════════════
+//  OVERRIDE sv() to enforce role-based access
+// ══════════════════════════════════════════════════
+var _svOriginal = sv;
+sv = function(v) {
+  var managerViews = ['admin', 'employees', 'setup'];
+  if (managerViews.indexOf(v) >= 0 && (!currentUser || currentUser.role !== 'manager')) {
+    toast('🔒 Manager access only.', 'e');
+    return;
+  }
+  _svOriginal(v);
+};
+
+
 window.onload = init;
 </script>
 </body>
