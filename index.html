@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -686,21 +687,22 @@ function subM(){
       tp=+document.getElementById('m-tp').value||0,td=document.getElementById('m-td').value.trim();
   if(!eid||!date||!mode||!login){toast('Fill all required fields (*)','e');return;}
   if(!td){toast('Please describe your tasks for today','e');return;}
+  if(!GAS_URL){setSS('err','No URL');toast('Connect Google Sheets in DB Setup before submitting.','e');sv('setup');return;}
   var emp=emps.find(function(e){return e.id===eid;});
   var rec={id:Date.now(),date:date,empId:eid,empName:emp.name,team:emp.team,mode:mode,loginTime:login,tasksPlanned:tp,taskDesc:td,onTime:isOT(login,emp.shift),submittedAt:new Date().toISOString()};
-  // Save locally first
-  var xi=cis.findIndex(function(c){return c.empId===eid&&c.date===date;});
-  if(xi>=0)cis[xi]=rec;else cis.push(rec);
-  DB.set('tp_c',cis);
-  // Sync to Sheets
   setSS('busy','Saving...');
   gasCall('saveCI', rec)
     .then(function(d){
-      if(d&&d.ok){setSS('ok','Saved ✓');toast('✅ Check-in saved! '+tp+' task'+(tp!==1?'s':'')+' sent to Sheets.','s');}
-      else{setSS('err','Sheet error');toast('Saved locally — Sheets error: '+(d?d.error:'no response'),'e');}
+      if(!(d&&d.ok)) throw new Error(d?d.error:'no response');
+      if(d.id) rec.id=d.id;
+      var xi=cis.findIndex(function(c){return c.empId===eid&&c.date===date;});
+      if(xi>=0)cis[xi]=rec;else cis.push(rec);
+      DB.set('tp_c',cis);
+      setSS('ok','Saved ✓');
+      toast('✅ Check-in saved to Sheets! '+tp+' task'+(tp!==1?'s':'')+' submitted.','s');
+      clrM();
     })
-    .catch(function(err){setSS('err','Sync error');toast('Saved locally — Sheets sync failed: '+err.message,'e');});
-  clrM();
+    .catch(function(err){setSS('err','Sheet error');toast('Could not save to Sheets: '+err.message,'e');});
 }
 function clrM(){['m-emp','m-mode','m-td'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});['m-login','m-tp'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});document.getElementById('m-team').value='';document.getElementById('m-ots').value='';}
 
@@ -762,17 +764,20 @@ function subE(){
     tomorrow:document.getElementById('e-tmr').value,
     onTime:ci?ci.onTime:isOT(login,emp.shift),submittedAt:new Date().toISOString()};
   r.score=calcSc(r);r.band=getBand(r.score);
-  var xi=rpts.findIndex(function(x){return x.empId===eid&&x.date===date;});
-  if(xi>=0)rpts[xi]=r;else rpts.push(r);
-  DB.set('tp_r',rpts);
+  if(!GAS_URL){setSS('err','No URL');toast('Connect Google Sheets in DB Setup before submitting.','e');sv('setup');return;}
   setSS('busy','Saving...');
   gasCall('saveEOD', r)
     .then(function(d){
-      if(d&&d.ok){setSS('ok','Saved ✓');toast('📊 EOD saved to Sheets! Score: '+r.score+'/100 · '+r.band,'s');}
-      else{setSS('err','Sheet error');toast('Saved locally — Sheets error: '+(d?d.error:'no response'),'e');}
+      if(!(d&&d.ok)) throw new Error(d?d.error:'no response');
+      if(d.id) r.id=d.id;
+      var xi=rpts.findIndex(function(x){return x.empId===eid&&x.date===date;});
+      if(xi>=0)rpts[xi]=r;else rpts.push(r);
+      DB.set('tp_r',rpts);
+      setSS('ok','Saved ✓');
+      toast('📊 EOD saved to Sheets! Score: '+r.score+'/100 · '+r.band,'s');
+      clrE();
     })
-    .catch(function(err){setSS('err','Sync error');toast('Saved locally — '+err.message,'e');});
-  clrE();
+    .catch(function(err){setSS('err','Sheet error');toast('Could not save to Sheets: '+err.message,'e');});
 }
 function clrE(){['e-emp','e-tdx','e-pnd','e-blk','e-sup','e-tmr'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['e-logout','e-brk','e-prod','e-meet','e-adm','e-tdn','e-cfy'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['r-q','r-r','r-o'].forEach(function(id){document.querySelectorAll('#'+id+' .rb').forEach(function(b){b.classList.remove('on');});});document.getElementById('e-login').value='';document.getElementById('e-moded').value='';document.getElementById('e-tpl').value='';document.getElementById('e-team').value='';document.getElementById('e-cistatus').style.display='none';document.getElementById('e-thhint').style.display='none';updCfy();}
 
@@ -826,9 +831,14 @@ function updSc(id,field,val){
 }
 function delR(id){
   if(!confirm('Delete this EOD report?'))return;
-  rpts=rpts.filter(function(r){return r.id!==id;});DB.set('tp_r',rpts);
-  gasCall('delReport',id).catch(function(){});
-  renderD();
+  setSS('busy','Deleting...');
+  gasCall('delReport',id)
+    .then(function(d){
+      if(!(d&&d.ok)) throw new Error(d?d.error:'no response');
+      rpts=rpts.filter(function(r){return r.id!==id;});DB.set('tp_r',rpts);
+      setSS('ok','Deleted ✓');renderD();toast('Report deleted from Sheets.','s');
+    })
+    .catch(function(err){setSS('err','Delete failed');toast('Could not delete from Sheets: '+err.message,'e');});
 }
 function clrAll(){if(!confirm('Clear local cache? Reload from Sheets to restore.'))return;cis=[];rpts=[];DB.set('tp_c',cis);DB.set('tp_r',rpts);renderD();toast('Local cache cleared. Hit Refresh to reload from Sheets.','i');}
 
@@ -875,12 +885,19 @@ function addE(){
   var ids=emps.map(function(e){return parseInt(e.id.replace('E',''));}).filter(function(n){return !isNaN(n);}),next=ids.length?Math.max.apply(null,ids)+1:1;
   var id=document.getElementById('en-id').value.trim()||('E'+String(next).padStart(3,'0'));
   var emp={id:id,name:name,team:document.getElementById('en-tm').value,manager:document.getElementById('en-mg').value.trim()||'Manager',shift:document.getElementById('en-sh').value||'09:00',status:'Active'};
-  emps.push(emp);DB.set('tp_e',emps);
+  if(!GAS_URL){setSS('err','No URL');toast('Connect Google Sheets in DB Setup before adding employees.','e');sv('setup');return;}
+  setSS('busy','Saving...');
   gasCall('saveEmp',emp)
-    .then(function(d){toast(name+(d&&d.ok?' added to Sheets!':' added locally only'),'s');})
-    .catch(function(){toast(name+' added locally','i');});
-  renderE();popDDs();
-  document.getElementById('en-nm').value='';document.getElementById('en-id').value='';
+    .then(function(d){
+      if(!(d&&d.ok)) throw new Error(d?d.error:'no response');
+      var xi=emps.findIndex(function(e){return e.id===emp.id;});
+      if(xi>=0)emps[xi]=emp;else emps.push(emp);
+      DB.set('tp_e',emps);setSS('ok','Saved ✓');
+      toast(name+' added to Sheets!','s');
+      renderE();popDDs();
+      document.getElementById('en-nm').value='';document.getElementById('en-id').value='';
+    })
+    .catch(function(err){setSS('err','Sheet error');toast('Could not add employee to Sheets: '+err.message,'e');});
 }
 function remE(id){if(!confirm('Remove this employee?'))return;emps=emps.filter(function(e){return e.id!==id;});DB.set('tp_e',emps);renderE();popDDs();}
 
