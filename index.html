@@ -100,6 +100,21 @@ code{background:rgba(79,142,247,.12);color:#93c5fd;padding:2px 6px;border-radius
 .hico{font-size:26px;} .hinf h2{margin-bottom:1px;font-size:14px;} .hinf p{color:var(--mut);font-size:11px;}
 .hbdg{margin-left:auto;padding:4px 11px;border-radius:6px;font-size:11px;font-weight:700;}
 .bm{background:#166534;color:#bbf7d0;} .beo{background:#2e1065;color:#ddd6fe;}
+/* Theme-morning overrides for hero + schedule blocks */
+body.theme-morning .hm{background:linear-gradient(135deg,#d1fae5,#e0f2fe);border:1px solid #6ee7b7;}
+body.theme-morning .he{background:linear-gradient(135deg,#e0f2fe,#ede9fe);border:1px solid #93c5fd;}
+body.theme-morning .hm .hinf h2{color:#065f46;}
+body.theme-morning .he .hinf h2{color:#1e3a5f;}
+body.theme-morning .bm{background:#059669;color:#fff;}
+body.theme-morning .beo{background:#7c3aed;color:#fff;}
+body.theme-morning .hm p,body.theme-morning .he p{color:#475569;}
+body.theme-morning .sm{background:linear-gradient(135deg,#d1fae5,#ecfdf5);border-color:#6ee7b7;}
+body.theme-morning .se{background:linear-gradient(135deg,#dbeafe,#ede9fe);border-color:#93c5fd;}
+body.theme-morning .sm .st{color:#065f46;}
+body.theme-morning .se .st{color:#1e3a5f;}
+body.theme-morning .sul li{color:#475569;}
+body.theme-morning .sul li::before{color:#0ea5e9;}
+body.theme-morning .sl{color:#334155;}
 
 .cfy{background:rgba(255,87,34,.06);border:1px solid rgba(255,87,34,.25);border-radius:9px;padding:11px 13px;margin-top:11px;}
 .cfyt{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
@@ -143,6 +158,10 @@ body.theme-morning .mc { background:#f1f5f9; border-color:#cbd5e1; }
 body.theme-morning #ldr { background:rgba(240,249,255,.92); }
 body.theme-morning input[type=date]::-webkit-calendar-picker-indicator,
 body.theme-morning input[type=time]::-webkit-calendar-picker-indicator { filter:none; opacity:.5; }
+
+/* Manager: hide employee-only tabs */
+body.is-manager .emp-only-tab { display:none !important; }
+
 
 /* ══ QUOTE BANNER ══ */
 #quote-banner {
@@ -253,8 +272,8 @@ body.is-manager .mgr-only-inline { display:inline-block; }
 <nav>
   <div class="logo">Team<span>Pulse</span></div>
   <div class="ntabs">
-    <button class="nt on"  onclick="sv('morning')">☀️ Morning Check-In</button>
-    <button class="nt" onclick="sv('eod')">🌙 EOD Report</button>
+    <button class="nt on emp-only-tab" onclick="sv('morning')">☀️ Morning Check-In</button>
+    <button class="nt emp-only-tab" onclick="sv('eod')">🌙 EOD Report</button>
     <button class="nt mgr-only" onclick="sv('admin')">📊 Manager Dashboard</button>
     <button class="nt mgr-only" onclick="sv('employees')">👥 Team Setup</button>
     <button class="nt mgr-only" onclick="sv('setup')">⚙️ DB Setup</button>
@@ -328,16 +347,16 @@ body.is-manager .mgr-only-inline { display:inline-block; }
 <div class="view" id="view-morning">
   <div class="hero hm">
     <div class="hico">☀️</div>
-    <div class="hinf"><h2>Morning Check-In</h2><p>Log your arrival &amp; share today's task plan — manager sees it instantly.</p></div>
+    <div class="hinf"><h2>Morning Check-In</h2><p>Log your arrival &amp; share today's task plan with your team.</p></div>
     <div class="hbdg bm" id="mlbl"></div>
   </div>
   <div class="sstrip">
     <div class="sbl sm"><div class="si">☀️</div><div class="sinfo">
-      <div class="st" id="sched-m">9:00 AM – 9:15 AM</div><div class="sl">Morning Routine</div>
+      <div class="sl">Morning Routine</div>
       <ul class="sul"><li>Log in &amp; start Clockify</li><li>Submit this check-in</li><li>Share today's priorities</li></ul>
     </div></div>
     <div class="sbl se"><div class="si">🌙</div><div class="sinfo">
-      <div class="st" id="sched-e">6:00 PM – 6:15 PM</div><div class="sl">End-of-Day Report</div>
+      <div class="sl">End-of-Day Report</div>
       <ul class="sul"><li>Stop Clockify – note total hrs</li><li>Fill EOD Report tab</li><li>Flag any blockers</li></ul>
     </div></div>
   </div>
@@ -355,7 +374,7 @@ body.is-manager .mgr-only-inline { display:inline-block; }
       <div class="f"><label>On-Time Status</label><input id="m-ots" readonly style="opacity:.8;"></div>
     </div>
   </div>
-  <div class="card" style="margin-bottom:11px;"><h3>📋 Today's Task Plan <span style="font-size:10px;color:var(--mut);font-weight:400;">— Manager sees this instantly</span></h3>
+  <div class="card" style="margin-bottom:11px;"><h3>📋 Today's Task Plan</h3>
     <div class="fg">
       <div class="f"><label>Tasks Planned *</label><input type="number" id="m-tp" min="0" max="20" placeholder="4"></div>
       <div class="f fc"><label>Describe Your Tasks *</label>
@@ -428,7 +447,7 @@ body.is-manager .mgr-only-inline { display:inline-block; }
       <div class="f fc"><label>Pending / Leftover Tasks</label><textarea id="e-pnd" placeholder="Module 4 review pushed to tomorrow..."></textarea></div>
     </div>
   </div>
-  <div class="card" style="margin-bottom:11px;"><h3>⭐ Self-Assessment <span style="font-size:10px;color:var(--mut);font-weight:400;">Manager also sees this</span></h3>
+  <div class="card" style="margin-bottom:11px;"><h3>⭐ Self-Assessment</h3>
     <div class="fg">
       <div class="f"><label>Quality (1–5)</label><div class="rrow" id="r-q"></div></div>
       <div class="f"><label>Responsiveness (1–5)</label><div class="rrow" id="r-r"></div></div>
@@ -825,8 +844,7 @@ function onME(){
   if(emp&&emp.shift){
     var sh=+emp.shift.split(':')[0],sm=+emp.shift.split(':')[1];
     var f=function(d){return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});};
-    document.getElementById('sched-m').textContent=f(new Date(0,0,0,sh,sm))+' – '+f(new Date(0,0,0,sh,sm+15));
-    document.getElementById('sched-e').textContent=f(new Date(0,0,0,sh+8,sm))+' – '+f(new Date(0,0,0,sh+8,sm+15));
+    // timing removed from schedule display
   }
   chkOT();
 }
