@@ -276,7 +276,7 @@ body.is-manager .mgr-only-inline { display:inline-block; }
     <button class="nt emp-only-tab" onclick="sv('eod')">🌙 EOD Report</button>
     <button class="nt mgr-only" onclick="sv('admin')">📊 Manager Dashboard</button>
     <button class="nt mgr-only" onclick="sv('employees')">👥 Team Setup</button>
-    <button class="nt mgr-only" onclick="sv('setup')">⚙️ DB Setup</button>
+    <button class="nt mgr-only" onclick="sv('setup')" title="Manager only">⚙️ DB Setup</button>
   </div>
   <div class="sync-wrap">
     <div class="sdot busy" id="sdot"></div>
@@ -318,7 +318,10 @@ body.is-manager .mgr-only-inline { display:inline-block; }
     </div></div>
     <div class="step-row"><div class="snum">4</div><div class="sbody">
       <div class="stitle">Paste URL &amp; Connect</div>
-      <div class="sdesc">Paste your Web App URL and click Test. If the test passes, click Connect to save.</div>
+      <div class="sdesc">
+        Paste your Web App URL and click Test. If the test passes, click Connect.<br><br>
+        <strong style="color:var(--grn);">⚡ To share with your whole team:</strong> Open the app's <code>index.html</code> file on GitHub, find the line <code>var HARDCODED_GAS_URL = '...'</code> and paste your URL there. Push to GitHub — everyone who opens the link will be auto-connected without any setup.
+      </div>
       <div style="display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;">
         <input id="su-url" type="text" placeholder="https://script.google.com/macros/s/.../exec"
           style="flex:1;min-width:260px;background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:8px 11px;color:var(--txt);font-size:12px;outline:none;" oninput="clearSuStatus()">
@@ -583,7 +586,20 @@ var DB={
   get:function(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},
   set:function(k,v){localStorage.setItem(k,JSON.stringify(v));}
 };
-var GAS_URL = DB.get('tp_url') || '';
+// ══ HARDCODED GAS URL — paste your Apps Script /exec URL below ══
+// This is the ONLY thing you need to change in the code.
+// Once set, every device that opens the GitHub Pages link is
+// automatically connected to the same Google Sheet. No setup needed.
+var HARDCODED_GAS_URL = 'https://script.google.com/macros/s/AKfycbzxyQTp3Jp0x4bqoYoL2wicpGX0ugthE32W8anFcms4RUagrKy_Omwlh8QIojScBYieag/exec';
+
+// Runtime URL resolution: hardcoded wins, localStorage is fallback
+var GAS_URL = (HARDCODED_GAS_URL && HARDCODED_GAS_URL !== 'https://script.google.com/macros/s/AKfycbzxyQTp3Jp0x4bqoYoL2wicpGX0ugthE32W8anFcms4RUagrKy_Omwlh8QIojScBYieag/exec')
+  ? HARDCODED_GAS_URL
+  : (DB.get('tp_url') || '');
+
+// Keep localStorage in sync so DB Setup panel shows correct URL
+if (GAS_URL) DB.set('tp_url', GAS_URL);
+
 var emps    = DB.get('tp_e')   || [];
 var cis     = DB.get('tp_c')   || [];
 var rpts    = DB.get('tp_r')   || [];
@@ -667,7 +683,15 @@ function loadAll() {
     })
     .catch(function(err) {
       setSS('err', 'Sync failed');
-      toast('Could not reach Sheets: ' + err.message, 'e');
+      // Helpful error for end users on shared devices
+      var msg = err.message.indexOf('timed out') >= 0
+        ? 'Google Sheet connection timed out. Check your internet connection.'
+        : 'Could not reach Google Sheets: ' + err.message;
+      toast(msg, 'e');
+      // If manager is logged in, offer to go to setup
+      if (currentUser && currentUser.role === 'manager') {
+        setTimeout(function() { toast('Manager: check DB Setup tab if URL is wrong.', 'i'); }, 3500);
+      }
     })
     .finally(function() { hideLdr(); });
 }
@@ -715,7 +739,9 @@ function connectURL() {
   GAS_URL = _testedURL;
   DB.set('tp_url', GAS_URL);
   document.getElementById('su-connect-btn').style.display = 'none';
-  document.getElementById('su-status').innerHTML = '<span style="color:var(--grn)">✅ Connected and saved! Loading data...</span>';
+  document.getElementById('su-status').innerHTML =
+    '<span style="color:var(--grn)">✅ Connected and saved for this browser!</span><br>' +
+    '<span style="color:var(--mut);font-size:11px;">To share with the team: put this URL in the HARDCODED_GAS_URL variable in index.html and push to GitHub.</span>';
   updSetupStatus();
   loadAll();
 }
@@ -813,10 +839,13 @@ function init(){
   if(GAS_URL){
     loadAll();
   } else {
-    setSS('err','No URL — go to DB Setup');
+    // No URL configured — only manager sees setup
+    setSS('err','No Sheet URL');
     hideLdr();
-    sv('setup');
-    toast('👆 First time? Go to DB Setup tab to connect your Google Sheet.','i');
+    if (currentUser && currentUser.role === 'manager') {
+      sv('setup');
+      toast('👆 Paste your Google Apps Script URL in DB Setup.','i');
+    }
   }
 }
 function popDDs(){
