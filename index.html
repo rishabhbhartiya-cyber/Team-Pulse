@@ -586,16 +586,14 @@ var DB={
   get:function(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}},
   set:function(k,v){localStorage.setItem(k,JSON.stringify(v));}
 };
-// ══ HARDCODED GAS URL — paste your Apps Script /exec URL below ══
-// This is the ONLY thing you need to change in the code.
-// Once set, every device that opens the GitHub Pages link is
-// automatically connected to the same Google Sheet. No setup needed.
-var HARDCODED_GAS_URL = 'https://script.google.com/macros/s/AKfycbzxyQTp3Jp0x4bqoYoL2wicpGX0ugthE32W8anFcms4RUagrKy_Omwlh8QIojScBYieag/exec';
+// ══════════════════════════════════════════════════
+//  GOOGLE SHEETS CONNECTION — HARDCODED FOR ALL DEVICES
+//  This URL is baked into the app. Every device that opens
+//  the GitHub Pages link connects to the same Sheet automatically.
+// ══════════════════════════════════════════════════
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbzxyQTp3Jp0x4bqoYoL2wicpGX0ugthE32W8anFcms4RUagrKy_Omwlh8QIojScBYieag/exec';
+DB.set('tp_url', GAS_URL); // keep localStorage in sync
 
-// Runtime URL resolution: hardcoded wins, localStorage is fallback
-var GAS_URL = (HARDCODED_GAS_URL && HARDCODED_GAS_URL !== 'https://script.google.com/macros/s/AKfycbzxyQTp3Jp0x4bqoYoL2wicpGX0ugthE32W8anFcms4RUagrKy_Omwlh8QIojScBYieag/exec')
-  ? HARDCODED_GAS_URL
-  : (DB.get('tp_url') || '');
 
 // Keep localStorage in sync so DB Setup panel shows correct URL
 if (GAS_URL) DB.set('tp_url', GAS_URL);
