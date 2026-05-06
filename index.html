@@ -595,9 +595,6 @@ var GAS_URL = 'https://script.google.com/macros/s/AKfycbzxyQTp3Jp0x4bqoYoL2wicpG
 DB.set('tp_url', GAS_URL); // keep localStorage in sync
 
 
-// Keep localStorage in sync so DB Setup panel shows correct URL
-if (GAS_URL) DB.set('tp_url', GAS_URL);
-
 var emps    = DB.get('tp_e')   || [];
 var cis     = DB.get('tp_c')   || [];
 var rpts    = DB.get('tp_r')   || [];
