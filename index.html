@@ -100,6 +100,21 @@ code{background:rgba(79,142,247,.12);color:#93c5fd;padding:2px 6px;border-radius
 .hico{font-size:26px;} .hinf h2{margin-bottom:1px;font-size:14px;} .hinf p{color:var(--mut);font-size:11px;}
 .hbdg{margin-left:auto;padding:4px 11px;border-radius:6px;font-size:11px;font-weight:700;}
 .bm{background:#166534;color:#bbf7d0;} .beo{background:#2e1065;color:#ddd6fe;}
+/* Theme-morning overrides for hero + schedule blocks */
+body.theme-morning .hm{background:linear-gradient(135deg,#d1fae5,#e0f2fe);border:1px solid #6ee7b7;}
+body.theme-morning .he{background:linear-gradient(135deg,#e0f2fe,#ede9fe);border:1px solid #93c5fd;}
+body.theme-morning .hm .hinf h2{color:#065f46;}
+body.theme-morning .he .hinf h2{color:#1e3a5f;}
+body.theme-morning .bm{background:#059669;color:#fff;}
+body.theme-morning .beo{background:#7c3aed;color:#fff;}
+body.theme-morning .hm p,body.theme-morning .he p{color:#475569;}
+body.theme-morning .sm{background:linear-gradient(135deg,#d1fae5,#ecfdf5);border-color:#6ee7b7;}
+body.theme-morning .se{background:linear-gradient(135deg,#dbeafe,#ede9fe);border-color:#93c5fd;}
+body.theme-morning .sm .st{color:#065f46;}
+body.theme-morning .se .st{color:#1e3a5f;}
+body.theme-morning .sul li{color:#475569;}
+body.theme-morning .sul li::before{color:#0ea5e9;}
+body.theme-morning .sl{color:#334155;}
 
 .cfy{background:rgba(255,87,34,.06);border:1px solid rgba(255,87,34,.25);border-radius:9px;padding:11px 13px;margin-top:11px;}
 .cfyt{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
@@ -116,73 +131,164 @@ code{background:rgba(79,142,247,.12);color:#93c5fd;padding:2px 6px;border-radius
 .sep{border:none;border-top:1px solid var(--bdr);margin:13px 0;}
 .rf{display:flex;gap:7px;align-items:center;flex-wrap:wrap;} .sp{flex:1;}
 canvas{width:100% !important;}
-/* ══ PERIOD FILTER TABS ══ */
-.period-tabs{display:flex;gap:4px;background:var(--sur);border:1px solid var(--bdr);border-radius:9px;padding:3px;}
-.ptab{padding:6px 16px;border-radius:7px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;background:transparent;color:var(--mut);transition:all .18s;white-space:nowrap;}
-.ptab.on{background:var(--acc);color:#fff;box-shadow:0 2px 8px rgba(79,142,247,.35);}
-.ptab:hover:not(.on){background:var(--bdr);color:var(--txt);}
-
-/* ══ ANALYTICS SECTION ══ */
-.analytics-header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;padding:16px 20px;background:linear-gradient(135deg,#0d1f3c,#0a1428);border:1px solid rgba(79,142,247,.25);border-radius:var(--r);}
-.analytics-header h2{margin:0;font-size:17px;}
-.analytics-header .aperiod-label{font-size:12px;color:var(--mut);}
-.analytics-header .aperiod-range{font-size:11px;color:var(--acc);font-weight:600;margin-left:4px;}
-
-/* ══ PERFORMER CARDS ══ */
-.perf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
-.perf-card{background:var(--sur);border:1px solid var(--bdr);border-radius:11px;padding:14px;position:relative;overflow:hidden;transition:border .2s;}
-.perf-card:hover{border-color:var(--acc);}
-.perf-card.top-card{border-color:rgba(34,197,94,.3);background:linear-gradient(135deg,rgba(34,197,94,.06),var(--sur));}
-.perf-card.imp-card{border-color:rgba(239,68,68,.25);background:linear-gradient(135deg,rgba(239,68,68,.05),var(--sur));}
-.perf-rank{position:absolute;top:10px;right:12px;font-size:22px;opacity:.8;}
-.perf-name{font-weight:700;font-size:14px;margin-bottom:2px;}
-.perf-team{font-size:10px;color:var(--mut);margin-bottom:10px;}
-.perf-score-big{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;line-height:1;}
-.perf-score-lbl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin-top:2px;}
-.perf-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bdr);}
-.perf-stat{text-align:center;}
-.perf-stat .sv{font-size:14px;font-weight:700;}
-.perf-stat .sl{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;}
-
-/* ══ ANALYTICS KPI ROW ══ */
-.akpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;}
-.akpi{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;text-align:center;}
-.akpi .av{font-family:'Syne',sans-serif;font-size:24px;font-weight:700;}
-.akpi .al{font-size:10px;color:var(--mut);margin-top:2px;text-transform:uppercase;letter-spacing:.05em;}
-.akpi .atd{font-size:10px;margin-top:3px;font-weight:600;}
-.atd.up{color:var(--grn);} .atd.dn{color:var(--red);} .atd.nt2{color:var(--mut);}
-
-/* ══ TREND CHART ══ */
-.trend-wrap{position:relative;height:200px;}
-
-/* ══ INSIGHT PILLS ══ */
-.insight-list{display:flex;flex-direction:column;gap:7px;}
-.insight-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--sur);border-radius:9px;border:1px solid var(--bdr);font-size:12px;}
-.insight-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
-.insight-text{line-height:1.5;}
-.insight-text strong{color:var(--txt);}
-
-@media(max-width:700px){.perf-grid{grid-template-columns:1fr;}.akpi-row{grid-template-columns:repeat(2,1fr);}}
-
 @media(max-width:660px){.c4{grid-template-columns:repeat(2,1fr);}.c3,.c2{grid-template-columns:1fr;}nav{padding:10px 12px;}.view{padding:12px;}}
+
+/* ══ THEME: Morning (bright) ══ */
+body.theme-morning {
+  --bg:#f0f9ff; --sur:#ffffff; --card:#f8faff; --bdr:#c7d9f0;
+  --acc:#0ea5e9; --acc2:#8b5cf6; --grn:#16a34a; --yel:#d97706;
+  --red:#dc2626; --txt:#0f172a; --mut:#64748b;
+}
+body.theme-morning nav { background:#fff; border-bottom:2px solid #bae6fd; }
+body.theme-morning .card { box-shadow:0 2px 8px rgba(14,165,233,.08); }
+body.theme-morning .f input,body.theme-morning .f select,body.theme-morning .f textarea {
+  background:#f1f5f9; border-color:#cbd5e1; color:#0f172a;
+}
+body.theme-morning .f input:focus,body.theme-morning .f select:focus,body.theme-morning .f textarea:focus { border-color:#0ea5e9; }
+body.theme-morning .f select option { background:#f1f5f9; color:#0f172a; }
+body.theme-morning .rb { background:#e0f2fe; border-color:#bae6fd; color:#0369a1; }
+body.theme-morning .rb.on { background:#0ea5e9; border-color:#0ea5e9; color:#fff; }
+body.theme-morning th { background:#f1f5f9; color:#475569; }
+body.theme-morning td { border-color:#e2e8f0; }
+body.theme-morning tr:hover td { background:rgba(14,165,233,.06); }
+body.theme-morning .nt { color:#64748b; }
+body.theme-morning .nt.on { background:#0ea5e9; color:#fff; }
+body.theme-morning .nt:hover:not(.on) { background:#e0f2fe; color:#0369a1; }
+body.theme-morning .mc { background:#f1f5f9; border-color:#cbd5e1; }
+body.theme-morning #ldr { background:rgba(240,249,255,.92); }
+body.theme-morning input[type=date]::-webkit-calendar-picker-indicator,
+body.theme-morning input[type=time]::-webkit-calendar-picker-indicator { filter:none; opacity:.5; }
+
+/* Manager: hide employee-only tabs */
+body.is-manager .emp-only-tab { display:none !important; }
+
+
+/* ══ QUOTE BANNER ══ */
+#quote-banner {
+  display:none;
+  padding:14px 22px;
+  margin:0;
+  border-bottom:1px solid var(--bdr);
+  font-size:13px;
+  text-align:center;
+  transition:all .3s;
+}
+#quote-banner.morning-quote {
+  background:linear-gradient(90deg,#fef3c7,#d1fae5,#dbeafe);
+  color:#1e3a5f;
+  border-bottom:1px solid #bae6fd;
+}
+#quote-banner.evening-quote {
+  background:linear-gradient(90deg,#1e1b4b,#1e3a5f,#1a1a2e);
+  color:#c7d2fe;
+  border-bottom:1px solid #2d2d5e;
+}
+#quote-banner .qname { font-weight:700; }
+#quote-banner .qtext { font-style:italic; margin-right:6px; }
+#quote-banner .qwelcome { font-weight:700; margin-right:8px; font-size:14px; }
+
+/* ══ LOGIN SCREEN ══ */
+#login-screen {
+  position:fixed;inset:0;z-index:10000;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;
+}
+#login-screen.h { display:none; }
+.login-box {
+  background:var(--card);
+  border:1px solid var(--bdr);
+  border-radius:16px;
+  padding:36px 32px;
+  width:100%;max-width:400px;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.login-logo { font-family:'Syne',sans-serif;font-weight:800;font-size:28px;text-align:center;margin-bottom:4px; }
+.login-logo span { color:var(--acc); }
+.login-sub { text-align:center;color:var(--mut);font-size:13px;margin-bottom:24px; }
+.login-field { margin-bottom:14px; }
+.login-field label { display:block;font-size:11px;color:var(--mut);margin-bottom:5px;text-transform:uppercase;letter-spacing:.06em;font-weight:500; }
+.login-field input, .login-field select {
+  width:100%;background:var(--sur);border:1px solid var(--bdr);
+  border-radius:8px;padding:10px 13px;color:var(--txt);
+  font-family:'DM Sans',sans-serif;font-size:14px;outline:none;
+  transition:border .2s;
+}
+.login-field input:focus,.login-field select:focus { border-color:var(--acc); }
+.login-field select option { background:var(--sur); color:var(--txt); }
+.login-btn {
+  width:100%;padding:12px;border-radius:9px;border:none;
+  background:var(--acc);color:#fff;font-family:'DM Sans',sans-serif;
+  font-size:15px;font-weight:600;cursor:pointer;transition:background .2s;margin-top:6px;
+}
+.login-btn:hover { background:#3b7ef5; }
+.login-err { color:var(--red);font-size:12px;text-align:center;margin-top:8px;min-height:18px; }
+.login-role-hint { font-size:11px;color:var(--mut);text-align:center;margin-top:10px; }
+
+/* ══ ROLE BADGES ══ */
+.role-badge {
+  padding:3px 10px;border-radius:99px;font-size:11px;font-weight:700;
+}
+.role-emp { background:rgba(79,142,247,.15);color:#93c5fd;border:1px solid rgba(79,142,247,.3); }
+.role-mgr { background:rgba(124,58,237,.15);color:#c4b5fd;border:1px solid rgba(124,58,237,.3); }
+
+/* ══ MANAGER-ONLY INDICATOR ══ */
+.mgr-only { display:none; }
+body.is-manager .mgr-only { display:flex; }
+body.is-manager .mgr-only-inline { display:inline-block; }
+.mgr-only-inline { display:none; }
+
 </style>
 </head>
 <body>
+
+<!-- ════ LOGIN SCREEN ════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">Team<span>Pulse</span></div>
+    <div class="login-sub">Daily work tracker · Sign in to continue</div>
+    <div class="login-field">
+      <label>Select Your Name</label>
+      <select id="login-emp-sel">
+        <option value="">-- Select Employee --</option>
+        <option value="__manager__">🔐 Manager / Admin Login</option>
+      </select>
+    </div>
+    <div id="login-pin-wrap" class="login-field" style="display:none;">
+      <label>Manager PIN</label>
+      <input type="password" id="login-pin" placeholder="Enter manager PIN" maxlength="6">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Sign In →</button>
+    <div class="login-err" id="login-err"></div>
+    <div class="login-role-hint" id="login-role-hint">Employees select their name · Manager enters PIN</div>
+  </div>
+</div>
+
+<!-- ════ QUOTE BANNER ════ -->
+<div id="quote-banner"></div>
+
 <div id="ldr"><div class="spin"></div><div class="lmsg" id="lmsg">Loading TeamPulse...</div></div>
 
 <nav>
   <div class="logo">Team<span>Pulse</span></div>
   <div class="ntabs">
-    <button class="nt on"  onclick="sv('morning')">☀️ Morning Check-In</button>
-    <button class="nt" onclick="sv('eod')">🌙 EOD Report</button>
-    <button class="nt" onclick="sv('admin')">📊 Manager Dashboard</button>
-    <button class="nt" onclick="sv('employees')">👥 Team Setup</button>
-    <button class="nt" onclick="sv('setup')">⚙️ DB Setup</button>
+    <button class="nt on emp-only-tab" onclick="sv('morning')">☀️ Morning Check-In</button>
+    <button class="nt emp-only-tab" onclick="sv('eod')">🌙 EOD Report</button>
+    <button class="nt mgr-only" onclick="sv('admin')">📊 Manager Dashboard</button>
+    <button class="nt mgr-only" onclick="sv('employees')">👥 Team Setup</button>
+    <button class="nt mgr-only" onclick="sv('setup')" title="Manager only">⚙️ DB Setup</button>
   </div>
   <div class="sync-wrap">
     <div class="sdot busy" id="sdot"></div>
     <span class="slbl" id="slbl">Connecting...</span>
   </div>
+
+  <div id="user-badge-wrap" style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+    <span id="user-badge-name" style="font-size:12px;font-weight:500;color:var(--txt);"></span>
+    <span id="user-role-badge" class="role-badge role-emp"></span>
+    <button onclick="doLogout()" style="background:none;border:1px solid var(--bdr);border-radius:6px;padding:4px 10px;color:var(--mut);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif;" title="Sign out">Sign Out</button>
+  </div>
+
 </nav>
 
 <!-- ════ DB SETUP ═══════════════════════════════════════════ -->
@@ -212,7 +318,10 @@ canvas{width:100% !important;}
     </div></div>
     <div class="step-row"><div class="snum">4</div><div class="sbody">
       <div class="stitle">Paste URL &amp; Connect</div>
-      <div class="sdesc">Paste your Web App URL and click Test. If the test passes, click Connect to save.</div>
+      <div class="sdesc">
+        Paste your Web App URL and click Test. If the test passes, click Connect.<br><br>
+        <strong style="color:var(--grn);">⚡ To share with your whole team:</strong> Open the app's <code>index.html</code> file on GitHub, find the line <code>var HARDCODED_GAS_URL = '...'</code> and paste your URL there. Push to GitHub — everyone who opens the link will be auto-connected without any setup.
+      </div>
       <div style="display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;">
         <input id="su-url" type="text" placeholder="https://script.google.com/macros/s/.../exec"
           style="flex:1;min-width:260px;background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:8px 11px;color:var(--txt);font-size:12px;outline:none;" oninput="clearSuStatus()">
@@ -241,16 +350,16 @@ canvas{width:100% !important;}
 <div class="view" id="view-morning">
   <div class="hero hm">
     <div class="hico">☀️</div>
-    <div class="hinf"><h2>Morning Check-In</h2><p>Log your arrival &amp; share today's task plan — manager sees it instantly.</p></div>
+    <div class="hinf"><h2>Morning Check-In</h2><p>Log your arrival &amp; share today's task plan with your team.</p></div>
     <div class="hbdg bm" id="mlbl"></div>
   </div>
   <div class="sstrip">
     <div class="sbl sm"><div class="si">☀️</div><div class="sinfo">
-      <div class="st" id="sched-m">9:00 AM – 9:15 AM</div><div class="sl">Morning Routine</div>
+      <div class="sl">Morning Routine</div>
       <ul class="sul"><li>Log in &amp; start Clockify</li><li>Submit this check-in</li><li>Share today's priorities</li></ul>
     </div></div>
     <div class="sbl se"><div class="si">🌙</div><div class="sinfo">
-      <div class="st" id="sched-e">6:00 PM – 6:15 PM</div><div class="sl">End-of-Day Report</div>
+      <div class="sl">End-of-Day Report</div>
       <ul class="sul"><li>Stop Clockify – note total hrs</li><li>Fill EOD Report tab</li><li>Flag any blockers</li></ul>
     </div></div>
   </div>
@@ -268,7 +377,7 @@ canvas{width:100% !important;}
       <div class="f"><label>On-Time Status</label><input id="m-ots" readonly style="opacity:.8;"></div>
     </div>
   </div>
-  <div class="card" style="margin-bottom:11px;"><h3>📋 Today's Task Plan <span style="font-size:10px;color:var(--mut);font-weight:400;">— Manager sees this instantly</span></h3>
+  <div class="card" style="margin-bottom:11px;"><h3>📋 Today's Task Plan</h3>
     <div class="fg">
       <div class="f"><label>Tasks Planned *</label><input type="number" id="m-tp" min="0" max="20" placeholder="4"></div>
       <div class="f fc"><label>Describe Your Tasks *</label>
@@ -341,7 +450,7 @@ canvas{width:100% !important;}
       <div class="f fc"><label>Pending / Leftover Tasks</label><textarea id="e-pnd" placeholder="Module 4 review pushed to tomorrow..."></textarea></div>
     </div>
   </div>
-  <div class="card" style="margin-bottom:11px;"><h3>⭐ Self-Assessment <span style="font-size:10px;color:var(--mut);font-weight:400;">Manager also sees this</span></h3>
+  <div class="card" style="margin-bottom:11px;"><h3>⭐ Self-Assessment</h3>
     <div class="fg">
       <div class="f"><label>Quality (1–5)</label><div class="rrow" id="r-q"></div></div>
       <div class="f"><label>Responsiveness (1–5)</label><div class="rrow" id="r-r"></div></div>
@@ -371,18 +480,6 @@ canvas{width:100% !important;}
     </div>
     <button class="btn bgh" style="padding:7px 12px;font-size:11px;" onclick="loadAll()">🔄 Refresh</button>
   </div>
-  <!-- ── PERIOD FILTER ── -->
-  <div class="rf" style="margin-bottom:14px;align-items:center;gap:12px;">
-    <div class="period-tabs">
-      <button class="ptab" onclick="setPeriod('week',this)">📅 Weekly</button>
-      <button class="ptab" onclick="setPeriod('month',this)">🗓 Monthly</button>
-      <button class="ptab" onclick="setPeriod('quarter',this)">📊 Quarterly</button>
-      <button class="ptab" onclick="setPeriod('year',this)">📆 Yearly</button>
-    </div>
-    <span id="period-range-lbl" style="font-size:11px;color:var(--acc);font-weight:600;"></span>
-    <div class="sp"></div>
-    <button class="btn bp" style="padding:7px 14px;font-size:11px;" onclick="sas('analytics',document.querySelector('.stab[data-id=analytics]'))">📈 View Analytics</button>
-  </div>
   <div class="erow">
     <button class="btn be" onclick="expCSV('eod')">⬇ EOD Reports</button>
     <button class="btn be" onclick="expCSV('ci')">⬇ Check-Ins</button>
@@ -393,7 +490,6 @@ canvas{width:100% !important;}
     <button class="stab on" onclick="sas('mv',this)">☀️ Morning Tasks</button>
     <button class="stab" onclick="sas('ov',this)">📊 Overview</button>
     <button class="stab" onclick="sas('ch',this)">📈 Charts</button>
-    <button class="stab" data-id="analytics" onclick="sas('analytics',this)">🏆 Analytics</button>
     <button class="stab" onclick="sas('lg',this)">📁 All Reports</button>
     <button class="stab" onclick="sas('sc',this)">⚙️ Scores</button>
   </div>
@@ -458,86 +554,6 @@ canvas{width:100% !important;}
       <div class="tw"><table><thead><tr><th>Date</th><th>Employee</th><th>Quality</th><th>Responsiveness</th><th>Ownership</th><th>Score</th><th>Del</th></tr></thead><tbody id="mgb"></tbody></table></div>
     </div>
   </div>
-
-  <!-- ════ ANALYTICS SECTION ════ -->
-  <div class="asec" id="asec-analytics">
-
-    <!-- HEADER -->
-    <div class="analytics-header">
-      <div>
-        <h2 id="an-title">📈 Weekly Analytics</h2>
-        <div><span class="aperiod-label">Period:</span><span class="aperiod-range" id="an-range">—</span></div>
-      </div>
-      <div class="sp"></div>
-      <div class="period-tabs" style="background:rgba(255,255,255,.05);">
-        <button class="ptab" onclick="setPeriod('week',this)">📅 Weekly</button>
-        <button class="ptab" onclick="setPeriod('month',this)">🗓 Monthly</button>
-        <button class="ptab" onclick="setPeriod('quarter',this)">📊 Quarterly</button>
-        <button class="ptab" onclick="setPeriod('year',this)">📆 Yearly</button>
-      </div>
-    </div>
-
-    <!-- KPI STRIP -->
-    <div class="akpi-row" id="an-kpis">
-      <div class="akpi"><div class="av" id="an-k1" style="color:var(--acc)">—</div><div class="al">Avg Score</div><div class="atd nt2" id="an-k1t">—</div></div>
-      <div class="akpi"><div class="av" id="an-k2" style="color:var(--grn)">—</div><div class="al">Task Completion</div><div class="atd nt2" id="an-k2t">—</div></div>
-      <div class="akpi"><div class="av" id="an-k3" style="color:var(--yel)">—</div><div class="al">Avg Clockify Hrs</div><div class="atd nt2" id="an-k3t">—</div></div>
-      <div class="akpi"><div class="av" id="an-k4" style="color:var(--acc2)">—</div><div class="al">On-Time Rate</div><div class="atd nt2" id="an-k4t">—</div></div>
-      <div class="akpi"><div class="av" id="an-k5" style="color:var(--red)">—</div><div class="al">Blockers Filed</div><div class="atd nt2" id="an-k5t">—</div></div>
-    </div>
-
-    <!-- TOP 3 + NEEDS IMPROVEMENT -->
-    <div class="cg c2" style="margin-bottom:14px;">
-      <div class="card">
-        <div class="rf" style="margin-bottom:12px;">
-          <h2 style="margin:0;">🏆 Top Performers</h2>
-          <span id="an-top-period" style="font-size:11px;color:var(--acc);font-weight:600;margin-left:8px;"></span>
-        </div>
-        <div class="perf-grid" id="an-top-grid">
-          <div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--mut);">Select a period above to view rankings.</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="rf" style="margin-bottom:12px;">
-          <h2 style="margin:0;">📈 Needs Improvement</h2>
-          <span id="an-imp-period" style="font-size:11px;color:var(--red);font-weight:600;margin-left:8px;"></span>
-        </div>
-        <div class="perf-grid" id="an-imp-grid">
-          <div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--mut);">Select a period above to view rankings.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TREND CHART + INSIGHTS -->
-    <div class="cg c2" style="margin-bottom:14px;">
-      <div class="card">
-        <h2>📉 Score Trend</h2>
-        <div class="trend-wrap"><canvas id="ch-trend"></canvas></div>
-      </div>
-      <div class="card">
-        <h2>📊 Productivity Breakdown</h2>
-        <div class="trend-wrap"><canvas id="ch-breakdown"></canvas></div>
-      </div>
-    </div>
-
-    <!-- TEAM LEADERBOARD -->
-    <div class="card" style="margin-bottom:14px;">
-      <h2>📋 Full Period Leaderboard</h2>
-      <div class="tw"><table>
-        <thead><tr><th>Rank</th><th>Employee</th><th>Team</th><th>Days</th><th>Avg Score</th><th>Task Rate</th><th>On-Time %</th><th>Avg Clockify</th><th>Blockers</th><th>Band</th></tr></thead>
-        <tbody id="an-leaderboard"></tbody>
-      </table></div>
-    </div>
-
-    <!-- AI INSIGHTS -->
-    <div class="card">
-      <h2>💡 Manager Insights</h2>
-      <div class="insight-list" id="an-insights">
-        <div class="insight-item"><div class="insight-icon">ℹ️</div><div class="insight-text">Select a period to generate insights.</div></div>
-      </div>
-    </div>
-
-  </div>
 </div>
 
 <!-- ════ TEAM SETUP ══════════════════════════════════════════ -->
@@ -577,6 +593,8 @@ var DB={
 // ══════════════════════════════════════════════════
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbzxyQTp3Jp0x4bqoYoL2wicpGX0ugthE32W8anFcms4RUagrKy_Omwlh8QIojScBYieag/exec';
 DB.set('tp_url', GAS_URL); // keep localStorage in sync
+
+
 var emps    = DB.get('tp_e')   || [];
 var cis     = DB.get('tp_c')   || [];
 var rpts    = DB.get('tp_r')   || [];
@@ -657,11 +675,18 @@ function loadAll() {
       popDDs(); renderD(); initLoginDropdown();
       updSetupStatus();
       toast('✅ Synced from Google Sheets!', 's');
-      if (!currentUser) { hideLdr(); document.getElementById('login-screen').classList.remove('h'); }
     })
     .catch(function(err) {
       setSS('err', 'Sync failed');
-      toast('Could not reach Sheets: ' + err.message, 'e');
+      // Helpful error for end users on shared devices
+      var msg = err.message.indexOf('timed out') >= 0
+        ? 'Google Sheet connection timed out. Check your internet connection.'
+        : 'Could not reach Google Sheets: ' + err.message;
+      toast(msg, 'e');
+      // If manager is logged in, offer to go to setup
+      if (currentUser && currentUser.role === 'manager') {
+        setTimeout(function() { toast('Manager: check DB Setup tab if URL is wrong.', 'i'); }, 3500);
+      }
     })
     .finally(function() { hideLdr(); });
 }
@@ -709,7 +734,9 @@ function connectURL() {
   GAS_URL = _testedURL;
   DB.set('tp_url', GAS_URL);
   document.getElementById('su-connect-btn').style.display = 'none';
-  document.getElementById('su-status').innerHTML = '<span style="color:var(--grn)">✅ Connected and saved! Loading data...</span>';
+  document.getElementById('su-status').innerHTML =
+    '<span style="color:var(--grn)">✅ Connected and saved for this browser!</span><br>' +
+    '<span style="color:var(--mut);font-size:11px;">To share with the team: put this URL in the HARDCODED_GAS_URL variable in index.html and push to GitHub.</span>';
   updSetupStatus();
   loadAll();
 }
@@ -781,13 +808,39 @@ function init(){
   // Load cached data immediately for instant render
   if(emps.length>0){popDDs();renderD();}
 
+
+  // Restore session
+  var savedUser = DB.get('tp_cu');
+  if (savedUser && savedUser.id) {
+    // Validate saved employee still exists
+    if (savedUser.role === 'employee') {
+      var stillExists = emps.find(function(e){ return e.id === savedUser.id; });
+      if (!stillExists && emps.length > 0) { savedUser = null; DB.set('tp_cu', null); }
+    }
+  }
+
+  // Init login dropdown after emps loaded
+  initLoginDropdown();
+  applyTheme();
+
+  if (savedUser && savedUser.id) {
+    currentUser = savedUser;
+    document.getElementById('login-screen').classList.add('h');
+    applySession();
+  } else {
+    hideLdr();
+  }
+
   if(GAS_URL){
     loadAll();
   } else {
-    setSS('err','No URL — go to DB Setup');
+    // No URL configured — only manager sees setup
+    setSS('err','No Sheet URL');
     hideLdr();
-    sv('setup');
-    toast('👆 First time? Go to DB Setup tab to connect your Google Sheet.','i');
+    if (currentUser && currentUser.role === 'manager') {
+      sv('setup');
+      toast('👆 Paste your Google Apps Script URL in DB Setup.','i');
+    }
   }
 }
 function popDDs(){
@@ -815,8 +868,7 @@ function onME(){
   if(emp&&emp.shift){
     var sh=+emp.shift.split(':')[0],sm=+emp.shift.split(':')[1];
     var f=function(d){return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});};
-    document.getElementById('sched-m').textContent=f(new Date(0,0,0,sh,sm))+' – '+f(new Date(0,0,0,sh,sm+15));
-    document.getElementById('sched-e').textContent=f(new Date(0,0,0,sh+8,sm))+' – '+f(new Date(0,0,0,sh+8,sm+15));
+    // timing removed from schedule display
   }
   chkOT();
 }
@@ -837,19 +889,19 @@ function subM(){
   if(!GAS_URL){setSS('err','No URL');toast('Connect Google Sheets in DB Setup before submitting.','e');sv('setup');return;}
   var emp=emps.find(function(e){return e.id===eid;});
   var rec={id:Date.now(),date:date,empId:eid,empName:emp.name,team:emp.team,mode:mode,loginTime:login,tasksPlanned:tp,taskDesc:td,onTime:isOT(login,emp.shift),submittedAt:new Date().toISOString()};
-  // Save locally first — guaranteed, even if Sheets is slow
-  var xi_m=cis.findIndex(function(c){return c.empId===eid&&c.date===date;});
-  if(xi_m>=0)cis[xi_m]=rec;else cis.push(rec);
-  DB.set('tp_c',cis);
-  clrM();
-  setSS('busy','Syncing to Sheets...');
+  setSS('busy','Saving...');
   gasCall('saveCI', rec)
     .then(function(d){
       if(!(d&&d.ok)) throw new Error(d?d.error:'no response');
+      if(d.id) rec.id=d.id;
+      var xi=cis.findIndex(function(c){return c.empId===eid&&c.date===date;});
+      if(xi>=0)cis[xi]=rec;else cis.push(rec);
+      DB.set('tp_c',cis);
       setSS('ok','Saved ✓');
-      toast('✅ Check-in saved! '+tp+' task'+(tp!==1?'s':'')+' synced to Sheets.','s');
+      toast('✅ Check-in saved to Sheets! '+tp+' task'+(tp!==1?'s':'')+' submitted.','s');
+      clrM();
     })
-    .catch(function(err){setSS('err','Sheets sync failed');toast('Saved locally. Sheet sync failed — refresh to retry.','e');});
+    .catch(function(err){setSS('err','Sheet error');toast('Could not save to Sheets: '+err.message,'e');});
 }
 function clrM(){['m-emp','m-mode','m-td'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});['m-login','m-tp'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});document.getElementById('m-team').value='';document.getElementById('m-ots').value='';}
 
@@ -1067,366 +1119,183 @@ function hideLdr(){document.getElementById('ldr').classList.add('h');}
 // ══════════════════════════════════════════════════
 
 // ══════════════════════════════════════════════════
-//  PERIOD ANALYTICS
+//  AUTH — login / logout / roles
 // ══════════════════════════════════════════════════
-var currentPeriod = 'month'; // default
+var MANAGER_PIN = '1234'; // Change this to your desired PIN
+var currentUser  = null;  // { id, name, team, role: 'employee'|'manager' }
 
-var PERIOD_LABELS = {
-  week: '📅 Weekly', month: '🗓 Monthly',
-  quarter: '📊 Quarterly', year: '📆 Yearly'
-};
-
-function getPeriodDates(period) {
-  var now = new Date();
-  var y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
-  var start, end = new Date(y, m, d);
-
-  if (period === 'week') {
-    var day = now.getDay(); // 0=Sun
-    var diff = day === 0 ? 6 : day - 1; // Mon start
-    start = new Date(y, m, d - diff);
-  } else if (period === 'month') {
-    start = new Date(y, m, 1);
-  } else if (period === 'quarter') {
-    var q = Math.floor(m / 3);
-    start = new Date(y, q * 3, 1);
-  } else { // year
-    start = new Date(y, 0, 1);
-  }
-
-  return { start: start, end: end };
-}
-
-function fmtDate(d) {
-  return d.toISOString().slice(0, 10);
-}
-
-function getPeriodLabel(period) {
-  var r = getPeriodDates(period);
-  var opts = { day: 'numeric', month: 'short' };
-  var s = r.start.toLocaleDateString('en-IN', opts);
-  var e = r.end.toLocaleDateString('en-IN', opts);
-  if (period === 'year') return r.start.getFullYear().toString();
-  if (period === 'quarter') {
-    var q = Math.floor(r.start.getMonth() / 3) + 1;
-    return 'Q' + q + ' ' + r.start.getFullYear();
-  }
-  return s + ' – ' + e;
-}
-
-function getFilteredReports(period) {
-  var range = getPeriodDates(period);
-  var startStr = fmtDate(range.start);
-  var endStr   = fmtDate(range.end);
-  return rpts.filter(function(r) {
-    return r.date >= startStr && r.date <= endStr;
-  });
-}
-
-function setPeriod(period, btn) {
-  currentPeriod = period;
-
-  // Update all period tab buttons (both sets)
-  document.querySelectorAll('.ptab').forEach(function(b) { b.classList.remove('on'); });
-  if (btn) btn.classList.add('on');
-
-  // Update top-bar label
-  var lbl = document.getElementById('period-range-lbl');
-  if (lbl) lbl.textContent = PERIOD_LABELS[period] + ': ' + getPeriodLabel(period);
-
-  // Switch to analytics tab
-  var analyticsTab = document.querySelector('.stab[data-id="analytics"]');
-  if (analyticsTab) sas('analytics', analyticsTab);
-
-  renderAnalytics(period);
-}
-
-function buildEmpStats(reports) {
-  // Group reports by employee, compute aggregates
-  var byEmp = {};
-  reports.forEach(function(r) {
-    var k = r.empId;
-    if (!byEmp[k]) byEmp[k] = {
-      id: k, name: r.empName, team: r.team,
-      scores: [], tasks_planned: 0, tasks_done: 0,
-      clockify_hrs: [], ontime: 0, late: 0,
-      blockers: 0, days: 0
-    };
-    var e = byEmp[k];
-    e.days++;
-    e.scores.push(r.score || 0);
-    e.tasks_planned += r.tasksPlanned || 0;
-    e.tasks_done    += r.tasksDone || 0;
-    if (r.clockifyHrs != null) e.clockify_hrs.push(r.clockifyHrs);
-    if (r.onTime) e.ontime++; else e.late++;
-    if (r.blocker && r.blocker.trim()) e.blockers++;
-  });
-
-  // Compute averages
-  return Object.values(byEmp).map(function(e) {
-    var avgScore = e.scores.reduce(function(a,b){return a+b;},0) / e.scores.length;
-    var taskRate = e.tasks_planned > 0 ? (e.tasks_done / e.tasks_planned) * 100 : 0;
-    var onTimePct = (e.ontime + e.late) > 0 ? (e.ontime / (e.ontime + e.late)) * 100 : 0;
-    var avgCfy = e.clockify_hrs.length > 0
-      ? e.clockify_hrs.reduce(function(a,b){return a+b;},0) / e.clockify_hrs.length : 0;
-    var band = avgScore >= 80 ? 'Excellent' : avgScore >= 65 ? 'Good' : avgScore >= 50 ? 'Acceptable' : 'Watch';
-    return {
-      id: e.id, name: e.name, team: e.team, days: e.days,
-      avgScore: Math.round(avgScore * 10) / 10,
-      taskRate: Math.round(taskRate),
-      onTimePct: Math.round(onTimePct),
-      avgCfy: Math.round(avgCfy * 10) / 10,
-      blockers: e.blockers,
-      band: band
-    };
-  }).sort(function(a, b) { return b.avgScore - a.avgScore; });
-}
-
-function renderPerformerCard(emp, rank, isTop) {
-  var rankEmoji = ['🥇','🥈','🥉'][rank] || ('#' + (rank + 1));
-  var scoreColor = emp.avgScore >= 80 ? 'var(--grn)' : emp.avgScore >= 65 ? 'var(--acc)' : emp.avgScore >= 50 ? 'var(--yel)' : 'var(--red)';
-  var cardClass = isTop ? 'perf-card top-card' : 'perf-card imp-card';
-  return '<div class="' + cardClass + '">' +
-    '<div class="perf-rank">' + rankEmoji + '</div>' +
-    '<div class="perf-name">' + emp.name + '</div>' +
-    '<div class="perf-team">' + emp.team + ' · ' + emp.days + ' day' + (emp.days !== 1 ? 's' : '') + '</div>' +
-    '<div class="perf-score-big" style="color:' + scoreColor + '">' + emp.avgScore + '</div>' +
-    '<div class="perf-score-lbl">Avg Score / 100</div>' +
-    '<div class="perf-stats">' +
-      '<div class="perf-stat"><div class="sv" style="color:var(--grn)">' + emp.taskRate + '%</div><div class="sl">Tasks Done</div></div>' +
-      '<div class="perf-stat"><div class="sv" style="color:var(--acc)">' + emp.onTimePct + '%</div><div class="sl">On Time</div></div>' +
-      '<div class="perf-stat"><div class="sv" style="color:var(--yel)">' + emp.avgCfy + 'h</div><div class="sl">Avg Hrs</div></div>' +
-      '<div class="perf-stat"><div class="sv" style="color:var(--red)">' + emp.blockers + '</div><div class="sl">Blockers</div></div>' +
-    '</div></div>';
-}
-
-function bCls2(b){var m={Excellent:'bex',Good:'bgd',Acceptable:'bac',Watch:'bwt'};return'band '+(m[b]||'bwt');}
-
-var _anCharts = {};
-function dAC(id){ if(_anCharts[id]){_anCharts[id].destroy();delete _anCharts[id];} }
-
-function renderAnalytics(period) {
-  period = period || currentPeriod;
-  var data = getFilteredReports(period);
-  var label = getPeriodLabel(period);
-  var titleMap = {week:'Weekly',month:'Monthly',quarter:'Quarterly',year:'Yearly'};
-
-  // Update header
-  document.getElementById('an-title').textContent = '📈 ' + titleMap[period] + ' Analytics';
-  document.getElementById('an-range').textContent = label;
-  document.getElementById('an-top-period').textContent = label;
-  document.getElementById('an-imp-period').textContent = label;
-
-  // ── KPIs ──
-  var avgScore   = data.length ? (data.reduce(function(s,r){return s+r.score;},0)/data.length).toFixed(1) : '—';
-  var totalPlan  = data.reduce(function(s,r){return s+r.tasksPlanned;},0);
-  var totalDone  = data.reduce(function(s,r){return s+r.tasksDone;},0);
-  var taskRate   = totalPlan > 0 ? Math.round(totalDone/totalPlan*100) + '%' : '—';
-  var cfyRpts    = data.filter(function(r){return r.clockifyHrs!=null;});
-  var avgCfy     = cfyRpts.length ? (cfyRpts.reduce(function(s,r){return s+r.clockifyHrs;},0)/cfyRpts.length).toFixed(1)+'h' : '—';
-  var otRpts     = data.filter(function(r){return r.onTime !== undefined;});
-  var otRate     = otRpts.length ? Math.round(otRpts.filter(function(r){return r.onTime;}).length/otRpts.length*100)+'%' : '—';
-  var blockers   = data.filter(function(r){return r.blocker&&r.blocker.trim();}).length;
-
-  document.getElementById('an-k1').textContent = avgScore;
-  document.getElementById('an-k2').textContent = taskRate;
-  document.getElementById('an-k3').textContent = avgCfy;
-  document.getElementById('an-k4').textContent = otRate;
-  document.getElementById('an-k5').textContent = blockers;
-
-  // Compare vs previous period for trend indicators
-  function getPrevDates(p) {
-    var r = getPeriodDates(p);
-    var diff = r.end - r.start;
-    return { start: new Date(r.start - diff - 86400000), end: new Date(r.start - 86400000) };
-  }
-  var prev = getPrevDates(period);
-  var prevData = rpts.filter(function(r){
-    return r.date >= fmtDate(prev.start) && r.date <= fmtDate(prev.end);
-  });
-  function trendHtml(cur, prevD, isHigherBetter) {
-    if (!prevD.length || cur === '—') return '<span class="atd nt2">vs prev period</span>';
-    var prevVal = parseFloat(prevD.reduce(function(s,r){return s+r.score;},0)/prevD.length);
-    var curVal  = parseFloat(cur);
-    if (isNaN(curVal) || isNaN(prevVal)) return '<span class="atd nt2">—</span>';
-    var diff = curVal - prevVal;
-    var cls  = diff > 0 ? (isHigherBetter ? 'up' : 'dn') : (isHigherBetter ? 'dn' : 'up');
-    var arrow = diff > 0 ? '↑' : '↓';
-    return '<span class="atd ' + cls + '">' + arrow + ' ' + Math.abs(diff).toFixed(1) + ' vs prev</span>';
-  }
-  document.getElementById('an-k1t').innerHTML = trendHtml(avgScore, prevData, true);
-  document.getElementById('an-k2t').innerHTML = '<span class="atd nt2">' + totalDone + ' / ' + totalPlan + ' tasks</span>';
-  document.getElementById('an-k3t').innerHTML = '<span class="atd nt2">' + cfyRpts.length + ' entries</span>';
-  document.getElementById('an-k4t').innerHTML = '<span class="atd nt2">' + otRpts.filter(function(r){return r.onTime;}).length + ' on-time</span>';
-  document.getElementById('an-k5t').innerHTML = '<span class="atd dn">' + blockers + ' reports</span>';
-
-  // ── PERFORMER GRIDS ──
-  var stats = buildEmpStats(data);
-  var topGrid = document.getElementById('an-top-grid');
-  var impGrid = document.getElementById('an-imp-grid');
-
-  if (!stats.length) {
-    var noData = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--mut);">No EOD reports found for this period.</div>';
-    topGrid.innerHTML = noData;
-    impGrid.innerHTML = noData;
-  } else {
-    var top3 = stats.slice(0, 3);
-    var imp3 = stats.slice().reverse().slice(0, 3);
-    topGrid.innerHTML = top3.map(function(e, i){ return renderPerformerCard(e, i, true); }).join('');
-    impGrid.innerHTML = imp3.map(function(e, i){ return renderPerformerCard(e, i, false); }).join('');
-  }
-
-  // ── TREND CHART (daily avg scores) ──
-  dAC('ch-trend');
-  var dateMap = {};
-  data.forEach(function(r) {
-    if (!dateMap[r.date]) dateMap[r.date] = [];
-    dateMap[r.date].push(r.score);
-  });
-  var trendDates = Object.keys(dateMap).sort();
-  var trendVals  = trendDates.map(function(d){
-    var arr = dateMap[d];
-    return (arr.reduce(function(a,b){return a+b;},0)/arr.length).toFixed(1);
-  });
-  if (document.getElementById('ch-trend') && trendDates.length > 0) {
-    _anCharts['ch-trend'] = new Chart(document.getElementById('ch-trend'), {
-      type: 'line',
-      data: {
-        labels: trendDates.map(function(d){ return d.slice(5); }), // MM-DD
-        datasets: [{
-          label: 'Avg Score',
-          data: trendVals,
-          borderColor: '#4f8ef7', backgroundColor: 'rgba(79,142,247,.12)',
-          borderWidth: 2, pointRadius: 3, tension: 0.3, fill: true
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { min: 0, max: 100, ticks: { color: '#6b7a99' }, grid: { color: '#1f2940' } },
-          x: { ticks: { color: '#6b7a99', maxTicksLimit: 10 }, grid: { display: false } }
-        }
-      }
+function initLoginDropdown() {
+  var sel = document.getElementById('login-emp-sel');
+  // Clear existing employee options (keep first two: blank + manager)
+  while (sel.options.length > 2) sel.remove(2);
+  emps.filter(function(e){ return e.status === 'Active'; })
+    .sort(function(a,b){ return a.name.localeCompare(b.name); })
+    .forEach(function(e) {
+      var o = document.createElement('option');
+      o.value = e.id;
+      o.textContent = e.name + ' (' + e.team + ')';
+      sel.appendChild(o);
     });
-  } else if (document.getElementById('ch-trend')) {
-    var ctx = document.getElementById('ch-trend').getContext('2d');
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-    ctx.fillStyle = '#6b7a99'; ctx.font = '13px DM Sans';
-    ctx.textAlign = 'center';
-    ctx.fillText('No data for this period', ctx.canvas.width/2, ctx.canvas.height/2);
-  }
-
-  // ── BREAKDOWN CHART (stacked bar: prod/meet/admin hrs) ──
-  dAC('ch-breakdown');
-  var empNames = stats.slice(0, 8).map(function(e){ return e.name.split(' ')[0]; });
-  var empIds   = stats.slice(0, 8).map(function(e){ return e.id; });
-  function avgMetric(empId, key) {
-    var empData = data.filter(function(r){ return r.empId === empId; });
-    if (!empData.length) return 0;
-    return (empData.reduce(function(s,r){ return s + (r[key]||0); }, 0) / empData.length).toFixed(1);
-  }
-  if (document.getElementById('ch-breakdown') && empIds.length > 0) {
-    _anCharts['ch-breakdown'] = new Chart(document.getElementById('ch-breakdown'), {
-      type: 'bar',
-      data: {
-        labels: empNames,
-        datasets: [
-          { label: 'Productive', data: empIds.map(function(id){ return avgMetric(id,'prodHrs'); }), backgroundColor: '#22c55e', borderRadius: 3 },
-          { label: 'Meetings',   data: empIds.map(function(id){ return avgMetric(id,'meetHrs'); }), backgroundColor: '#4f8ef7', borderRadius: 3 },
-          { label: 'Admin',      data: empIds.map(function(id){ return avgMetric(id,'adminHrs'); }), backgroundColor: '#f59e0b', borderRadius: 3 }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { color: '#e8eaf2', padding: 10, font: { size: 11 } } } },
-        scales: {
-          x: { stacked: true, ticks: { color: '#6b7a99' }, grid: { display: false } },
-          y: { stacked: true, ticks: { color: '#6b7a99' }, grid: { color: '#1f2940' } }
-        }
-      }
-    });
-  }
-
-  // ── LEADERBOARD ──
-  var lb = document.getElementById('an-leaderboard');
-  if (!stats.length) {
-    lb.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--mut);padding:20px;">No data for this period.</td></tr>';
-  } else {
-    lb.innerHTML = stats.map(function(e, i) {
-      return '<tr>' +
-        '<td><strong>' + (i+1) + '</strong></td>' +
-        '<td><strong>' + e.name + '</strong></td>' +
-        '<td>' + e.team + '</td>' +
-        '<td>' + e.days + '</td>' +
-        '<td><strong style="color:' + (e.avgScore>=80?'var(--grn)':e.avgScore>=65?'var(--acc)':e.avgScore>=50?'var(--yel)':'var(--red)') + '">' + e.avgScore + '</strong></td>' +
-        '<td>' + e.taskRate + '%</td>' +
-        '<td>' + e.onTimePct + '%</td>' +
-        '<td>' + (e.avgCfy > 0 ? e.avgCfy + 'h' : '—') + '</td>' +
-        '<td>' + (e.blockers > 0 ? '<span style="color:var(--red)">' + e.blockers + '</span>' : '0') + '</td>' +
-        '<td><span class="' + bCls2(e.band) + '">' + e.band + '</span></td>' +
-        '</tr>';
-    }).join('');
-  }
-
-  // ── INSIGHTS ──
-  var insights = [];
-  if (stats.length > 0) {
-    var best = stats[0], worst = stats[stats.length - 1];
-
-    // Top performer insight
-    insights.push({ icon: '🏆', text: '<strong>' + best.name + '</strong> leads ' + titleMap[period].toLowerCase() + ' with an avg score of <strong>' + best.avgScore + '/100</strong> and <strong>' + best.taskRate + '% task completion</strong>.' });
-
-    // Needs improvement
-    if (stats.length > 1) {
-      insights.push({ icon: '⚠️', text: '<strong>' + worst.name + '</strong> may need support — avg score <strong>' + worst.avgScore + '/100</strong>, task completion <strong>' + worst.taskRate + '%</strong>. Consider a 1:1 check-in.' });
-    }
-
-    // On-time analysis
-    var lowOT = stats.filter(function(e){ return e.onTimePct < 70; });
-    if (lowOT.length > 0) {
-      insights.push({ icon: '⏰', text: '<strong>' + lowOT.length + ' member' + (lowOT.length > 1 ? 's' : '') + '</strong> had below 70% on-time rate this ' + titleMap[period].toLowerCase() + ': ' + lowOT.map(function(e){ return e.name.split(' ')[0]; }).join(', ') + '.' });
-    } else {
-      insights.push({ icon: '✅', text: 'All team members maintained <strong>70%+ on-time attendance</strong> this ' + titleMap[period].toLowerCase() + '. Excellent discipline!' });
-    }
-
-    // Blockers
-    var highBlockers = stats.filter(function(e){ return e.blockers >= 3; });
-    if (highBlockers.length > 0) {
-      insights.push({ icon: '🚧', text: '<strong>' + highBlockers.map(function(e){ return e.name.split(' ')[0]; }).join(', ') + '</strong> reported repeated blockers (' + highBlockers.map(function(e){ return e.blockers; }).join(', ') + '). Review dependencies and unblock urgently.' });
-    }
-
-    // Clockify gap
-    var badCfy = data.filter(function(r){ return r.clockifyHrs != null && Math.abs(r.clockifyHrs - r.netHrs) > 1; });
-    if (badCfy.length > 0) {
-      insights.push({ icon: '🔴', text: '<strong>' + badCfy.length + ' log' + (badCfy.length > 1 ? 's' : '') + '</strong> had a Clockify vs system hours gap of over 1 hour this ' + titleMap[period].toLowerCase() + '. Remind team to start/stop Clockify accurately.' });
-    }
-
-    // Overall team health
-    var overallAvg = parseFloat(avgScore);
-    if (!isNaN(overallAvg)) {
-      if (overallAvg >= 75) {
-        insights.push({ icon: '🌟', text: 'Team overall performance is <strong>strong</strong> this ' + titleMap[period].toLowerCase() + ' with avg score <strong>' + avgScore + '/100</strong>. Keep up the momentum!' });
-      } else if (overallAvg >= 60) {
-        insights.push({ icon: '📌', text: 'Team avg score is <strong>' + avgScore + '/100</strong> — <strong>Good</strong> but there\'s room to improve. Focus on task completion consistency.' });
-      } else {
-        insights.push({ icon: '🔔', text: 'Team avg score is <strong>' + avgScore + '/100</strong> — below target. Recommend reviewing workload distribution and blockers this week.' });
-      }
-    }
-  } else {
-    insights.push({ icon: 'ℹ️', text: 'No EOD reports found for this period. Ask the team to submit their daily reports.' });
-  }
-
-  document.getElementById('an-insights').innerHTML = insights.map(function(ins) {
-    return '<div class="insight-item"><div class="insight-icon">' + ins.icon + '</div><div class="insight-text">' + ins.text + '</div></div>';
-  }).join('');
 }
 
-// Override sas to trigger analytics render when switching to analytics tab
-var _sasOrig = sas;
-sas = function(id, btn) {
-  _sasOrig(id, btn);
-  if (id === 'analytics') renderAnalytics(currentPeriod);
+document.getElementById('login-emp-sel').addEventListener('change', function() {
+  var pinWrap = document.getElementById('login-pin-wrap');
+  pinWrap.style.display = this.value === '__manager__' ? 'block' : 'none';
+  document.getElementById('login-err').textContent = '';
+  if (this.value !== '__manager__') document.getElementById('login-pin').value = '';
+});
+
+document.getElementById('login-pin').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') doLogin();
+});
+
+function doLogin() {
+  var sel  = document.getElementById('login-emp-sel');
+  var val  = sel.value;
+  var err  = document.getElementById('login-err');
+  err.textContent = '';
+
+  if (!val) { err.textContent = 'Please select your name or manager login.'; return; }
+
+  if (val === '__manager__') {
+    var pin = document.getElementById('login-pin').value.trim();
+    if (pin !== MANAGER_PIN) { err.textContent = 'Incorrect PIN. Please try again.'; return; }
+    currentUser = { id: '__manager__', name: 'Manager', team: 'Management', role: 'manager' };
+  } else {
+    var emp = emps.find(function(e){ return e.id === val; });
+    if (!emp) { err.textContent = 'Employee not found. Contact your manager.'; return; }
+    currentUser = { id: emp.id, name: emp.name, team: emp.team, role: 'employee' };
+  }
+
+  DB.set('tp_cu', currentUser);
+  applySession();
+  document.getElementById('login-screen').classList.add('h');
+}
+
+function doLogout() {
+  currentUser = null;
+  DB.set('tp_cu', null);
+  // Reset UI
+  document.body.classList.remove('is-manager');
+  document.getElementById('login-screen').classList.remove('h');
+  document.getElementById('login-emp-sel').value = '';
+  document.getElementById('login-pin').value = '';
+  document.getElementById('login-pin-wrap').style.display = 'none';
+  document.getElementById('login-err').textContent = '';
+  document.getElementById('quote-banner').style.display = 'none';
+  // Auto-fill morning name if employee just logged out and comes back
+}
+
+function applySession() {
+  if (!currentUser) return;
+
+  // User badge
+  document.getElementById('user-badge-name').textContent = currentUser.name;
+  var roleBadge = document.getElementById('user-role-badge');
+  if (currentUser.role === 'manager') {
+    roleBadge.textContent = '👑 Manager';
+    roleBadge.className = 'role-badge role-mgr';
+    document.body.classList.add('is-manager');
+  } else {
+    roleBadge.textContent = '👤 Employee';
+    roleBadge.className = 'role-badge role-emp';
+    document.body.classList.remove('is-manager');
+  }
+
+  // Auto-select employee in forms
+  if (currentUser.role === 'employee') {
+    var mSel = document.getElementById('m-emp');
+    var eSel = document.getElementById('e-emp');
+    if (mSel) { mSel.value = currentUser.id; onME(); }
+    if (eSel) { eSel.value = currentUser.id; onEE(); }
+  }
+
+  applyTheme();
+  showQuote();
+
+  // Show correct default view
+  if (currentUser.role === 'manager') {
+    sv('admin');
+  } else {
+    var hr = new Date().getHours();
+    sv(hr >= 15 ? 'eod' : 'morning');
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  THEME — morning bright / evening dark
+// ══════════════════════════════════════════════════
+function applyTheme() {
+  var hr = new Date().getHours();
+  var isMorning = (hr >= 5 && hr < 15); // 5am–3pm = morning theme
+  if (isMorning) {
+    document.body.classList.add('theme-morning');
+  } else {
+    document.body.classList.remove('theme-morning');
+  }
+}
+
+// ══════════════════════════════════════════════════
+//  QUOTES — morning welcome / evening appreciation
+// ══════════════════════════════════════════════════
+var MORNING_QUOTES = [
+  { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+  { text: "Success is the sum of small efforts repeated day in and day out.", author: "Robert Collier" },
+  { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+  { text: "Do something today that your future self will thank you for.", author: "Sean Patrick Flanery" },
+  { text: "It always seems impossible until it's done.", author: "Nelson Mandela" },
+  { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+  { text: "Great things are done by a series of small things brought together.", author: "Vincent van Gogh" },
+  { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+];
+var EVENING_QUOTES = [
+  { text: "You are stronger than you think. Rest well — tomorrow is a new canvas.", author: "TeamPulse" },
+  { text: "Every day you show up is a win. Be proud of what you accomplished today.", author: "TeamPulse" },
+  { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
+  { text: "The harder you work for something, the greater you'll feel when you achieve it.", author: "TeamPulse" },
+  { text: "Don't count the days, make the days count.", author: "Muhammad Ali" },
+  { text: "Success isn't always about greatness. It's about consistency.", author: "Dwayne Johnson" },
+  { text: "You've done more today than you realize. Log off with pride.", author: "TeamPulse" },
+  { text: "Each evening brings an end. Each morning brings new hope.", author: "TeamPulse" },
+];
+
+function showQuote() {
+  if (!currentUser) return;
+  var hr = new Date().getHours();
+  var isMorning = (hr >= 5 && hr < 15);
+  var banner = document.getElementById('quote-banner');
+  var name = currentUser.name.split(' ')[0];
+
+  var q;
+  if (isMorning) {
+    q = MORNING_QUOTES[Math.floor(Math.random() * MORNING_QUOTES.length)];
+    banner.className = 'morning-quote';
+    banner.innerHTML =
+      '<span class="qwelcome">☀️ Good morning, ' + name + '!</span>' +
+      '<span class="qtext">"' + q.text + '"</span>' +
+      '<span class="qname">— ' + q.author + '</span>';
+  } else {
+    q = EVENING_QUOTES[Math.floor(Math.random() * EVENING_QUOTES.length)];
+    banner.className = 'evening-quote';
+    banner.innerHTML =
+      '<span class="qwelcome">🌙 Great work today, ' + name + '!</span>' +
+      '<span class="qtext">"' + q.text + '"</span>' +
+      '<span class="qname">— ' + q.author + '</span>';
+  }
+  banner.style.display = 'block';
+}
+
+// ══════════════════════════════════════════════════
+//  OVERRIDE sv() to enforce role-based access
+// ══════════════════════════════════════════════════
+var _svOriginal = sv;
+sv = function(v) {
+  var managerViews = ['admin', 'employees', 'setup'];
+  if (managerViews.indexOf(v) >= 0 && (!currentUser || currentUser.role !== 'manager')) {
+    toast('🔒 Manager access only.', 'e');
+    return;
+  }
+  _svOriginal(v);
 };
 
 
