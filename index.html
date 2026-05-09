@@ -148,6 +148,11 @@ canvas{width:100% !important;}
 .analytics-chart{height:250px;}
 .analytics-note{background:var(--sur);border:1px solid var(--bdr);border-radius:9px;padding:10px 12px;font-size:12px;line-height:1.5;margin-bottom:8px;}
 .analytics-note strong{color:var(--txt);}
+#analytics-report.pdf-exporting .analytics-grid{display:block;margin-bottom:0;}
+#analytics-report.pdf-exporting .analytics-grid .card{margin-bottom:14px;}
+#analytics-report.pdf-exporting .card,#analytics-report.pdf-exporting .analytics-chart,#analytics-report.pdf-exporting img{break-inside:avoid;page-break-inside:avoid;}
+#analytics-report.pdf-exporting .analytics-grid:first-of-type{break-before:page;page-break-before:always;}
+#analytics-report.pdf-exporting .analytics-chart{height:260px;}
 @media(max-width:900px){.analytics-kpis{grid-template-columns:repeat(2,1fr);}.analytics-grid{grid-template-columns:1fr;}}
 @media(max-width:660px){.c4{grid-template-columns:repeat(2,1fr);}.c3,.c2{grid-template-columns:1fr;}nav{padding:10px 12px;}.view{padding:12px;}}
 
@@ -1391,6 +1396,11 @@ function hideAnalyticsPDFControls(root){
   };
 }
 
+function setAnalyticsPDFMode(root,on){
+  if(on) root.classList.add('pdf-exporting');
+  else root.classList.remove('pdf-exporting');
+}
+
 function downloadAnalyticsPDF(){
   renderAnalytics();
   var label=(document.getElementById('an-filter-label').textContent||'analytics').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'');
@@ -1403,6 +1413,7 @@ function downloadAnalyticsPDF(){
   toast('Preparing analytics PDF...','i');
   setTimeout(function(){
     var el=document.getElementById('analytics-report');
+    setAnalyticsPDFMode(el,true);
     prepareAnalyticsChartsForPDF();
     var restoreCharts=swapAnalyticsCanvasesForPDF(el);
     var restoreControls=hideAnalyticsPDFControls(el);
@@ -1412,14 +1423,16 @@ function downloadAnalyticsPDF(){
       image:{type:'jpeg',quality:.98},
       html2canvas:{scale:2,backgroundColor:'#0a0d14',useCORS:true,allowTaint:true},
       jsPDF:{unit:'in',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['avoid-all','css','legacy']}
+      pagebreak:{mode:['css','legacy'],before:['#analytics-report.pdf-exporting .analytics-grid:first-of-type'],avoid:['#analytics-report.pdf-exporting .card','#analytics-report.pdf-exporting .analytics-chart','#analytics-report.pdf-exporting img']}
     }).from(el).save().then(function(){
       restoreControls();
       restoreCharts();
+      setAnalyticsPDFMode(el,false);
       toast('Analytics PDF downloaded.','s');
     }).catch(function(){
       restoreControls();
       restoreCharts();
+      setAnalyticsPDFMode(el,false);
       toast('PDF download failed. Please try again.','e');
     });
   },500);
