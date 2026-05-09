@@ -1345,46 +1345,54 @@ function renderAnalytics(){
 function prepareAnalyticsChartsForPDF(){
   Object.keys(ANC).forEach(function(id){
     if(ANC[id]){
+      ANC[id].options.animation=false;
       ANC[id].resize();
       ANC[id].update('none');
     }
   });
 }
 
-function buildAnalyticsPDFClone(){
-  var source=document.getElementById('analytics-report');
-  var clone=source.cloneNode(true);
-  clone.id='analytics-report-pdf';
-  clone.style.position='absolute';
-  clone.style.left='-10000px';
-  clone.style.top='0';
-  clone.style.width=source.offsetWidth+'px';
-  clone.style.background='var(--bg)';
-  clone.style.padding='10px';
-
-  clone.querySelectorAll('button').forEach(function(btn){btn.style.display='none';});
-
-  var sourceCanvases=source.querySelectorAll('canvas');
-  var cloneCanvases=clone.querySelectorAll('canvas');
-  sourceCanvases.forEach(function(canvas,i){
-    var target=cloneCanvases[i];
-    if(!target) return;
-    var img=document.createElement('img');
+function swapAnalyticsCanvasesForPDF(root){
+  var swaps=[];
+  root.querySelectorAll('canvas').forEach(function(canvas){
     var chart=ANC[canvas.id];
-    img.src=chart?chart.toBase64Image('image/png',1):canvas.toDataURL('image/png');
+    var parent=canvas.parentNode;
+    if(!parent) return;
+    var img=document.createElement('img');
+    try{
+      img.src=chart?chart.toBase64Image('image/png',1):canvas.toDataURL('image/png');
+    }catch(e){
+      return;
+    }
     img.style.display='block';
     img.style.width='100%';
-    img.style.height=(canvas.parentNode?canvas.parentNode.offsetHeight:canvas.height)+'px';
+    img.style.height=(parent.offsetHeight||canvas.offsetHeight||240)+'px';
     img.style.objectFit='contain';
     img.style.background='transparent';
-    target.parentNode.replaceChild(img,target);
+    parent.replaceChild(img,canvas);
+    swaps.push({parent:parent,img:img,canvas:canvas});
   });
-  return clone;
+  return function(){
+    swaps.forEach(function(s){
+      if(s.img.parentNode===s.parent)s.parent.replaceChild(s.canvas,s.img);
+    });
+    prepareAnalyticsChartsForPDF();
+  };
+}
+
+function hideAnalyticsPDFControls(root){
+  var states=[];
+  root.querySelectorAll('button').forEach(function(btn){
+    states.push({el:btn,display:btn.style.display});
+    btn.style.display='none';
+  });
+  return function(){
+    states.forEach(function(s){s.el.style.display=s.display;});
+  };
 }
 
 function downloadAnalyticsPDF(){
   renderAnalytics();
-  prepareAnalyticsChartsForPDF();
   var label=(document.getElementById('an-filter-label').textContent||'analytics').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'');
   var file='TeamPulse_Analytics_'+label+'.pdf';
   if(!window.html2pdf){
@@ -1394,8 +1402,10 @@ function downloadAnalyticsPDF(){
   }
   toast('Preparing analytics PDF...','i');
   setTimeout(function(){
-    var clone=buildAnalyticsPDFClone();
-    document.body.appendChild(clone);
+    var el=document.getElementById('analytics-report');
+    prepareAnalyticsChartsForPDF();
+    var restoreCharts=swapAnalyticsCanvasesForPDF(el);
+    var restoreControls=hideAnalyticsPDFControls(el);
     html2pdf().set({
       margin:.35,
       filename:file,
@@ -1403,11 +1413,13 @@ function downloadAnalyticsPDF(){
       html2canvas:{scale:2,backgroundColor:'#0a0d14',useCORS:true,allowTaint:true},
       jsPDF:{unit:'in',format:'a4',orientation:'portrait'},
       pagebreak:{mode:['avoid-all','css','legacy']}
-    }).from(clone).save().then(function(){
-      if(clone.parentNode) clone.parentNode.removeChild(clone);
+    }).from(el).save().then(function(){
+      restoreControls();
+      restoreCharts();
       toast('Analytics PDF downloaded.','s');
     }).catch(function(){
-      if(clone.parentNode) clone.parentNode.removeChild(clone);
+      restoreControls();
+      restoreCharts();
       toast('PDF download failed. Please try again.','e');
     });
   },500);
