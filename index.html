@@ -1342,17 +1342,75 @@ function renderAnalytics(){
   }).join('')||'<tr><td colspan="9" style="text-align:center;color:var(--mut);padding:18px;">No analytics data for this filter.</td></tr>';
 }
 
+function prepareAnalyticsChartsForPDF(){
+  Object.keys(ANC).forEach(function(id){
+    if(ANC[id]){
+      ANC[id].resize();
+      ANC[id].update('none');
+    }
+  });
+}
+
+function buildAnalyticsPDFClone(){
+  var source=document.getElementById('analytics-report');
+  var clone=source.cloneNode(true);
+  clone.id='analytics-report-pdf';
+  clone.style.position='absolute';
+  clone.style.left='-10000px';
+  clone.style.top='0';
+  clone.style.width=source.offsetWidth+'px';
+  clone.style.background='var(--bg)';
+  clone.style.padding='10px';
+
+  clone.querySelectorAll('button').forEach(function(btn){btn.style.display='none';});
+
+  var sourceCanvases=source.querySelectorAll('canvas');
+  var cloneCanvases=clone.querySelectorAll('canvas');
+  sourceCanvases.forEach(function(canvas,i){
+    var target=cloneCanvases[i];
+    if(!target) return;
+    var img=document.createElement('img');
+    var chart=ANC[canvas.id];
+    img.src=chart?chart.toBase64Image('image/png',1):canvas.toDataURL('image/png');
+    img.style.display='block';
+    img.style.width='100%';
+    img.style.height=(canvas.parentNode?canvas.parentNode.offsetHeight:canvas.height)+'px';
+    img.style.objectFit='contain';
+    img.style.background='transparent';
+    target.parentNode.replaceChild(img,target);
+  });
+  return clone;
+}
+
 function downloadAnalyticsPDF(){
   renderAnalytics();
-  var el=document.getElementById('analytics-report');
+  prepareAnalyticsChartsForPDF();
   var label=(document.getElementById('an-filter-label').textContent||'analytics').replace(/[^a-z0-9]+/gi,'_').replace(/^_+|_+$/g,'');
   var file='TeamPulse_Analytics_'+label+'.pdf';
-  if(window.html2pdf){
-    html2pdf().set({margin:.35,filename:file,image:{type:'jpeg',quality:.98},html2canvas:{scale:2,backgroundColor:'#0a0d14',useCORS:true},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(el).save();
-  }else{
+  if(!window.html2pdf){
     toast('PDF library not loaded. Opening print dialog instead.','i');
     window.print();
+    return;
   }
+  toast('Preparing analytics PDF...','i');
+  setTimeout(function(){
+    var clone=buildAnalyticsPDFClone();
+    document.body.appendChild(clone);
+    html2pdf().set({
+      margin:.35,
+      filename:file,
+      image:{type:'jpeg',quality:.98},
+      html2canvas:{scale:2,backgroundColor:'#0a0d14',useCORS:true,allowTaint:true},
+      jsPDF:{unit:'in',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['avoid-all','css','legacy']}
+    }).from(clone).save().then(function(){
+      if(clone.parentNode) clone.parentNode.removeChild(clone);
+      toast('Analytics PDF downloaded.','s');
+    }).catch(function(){
+      if(clone.parentNode) clone.parentNode.removeChild(clone);
+      toast('PDF download failed. Please try again.','e');
+    });
+  },500);
 }
 
 // ══════════════════════════════════════════════════
