@@ -22,6 +22,7 @@ nav{display:flex;align-items:center;gap:8px;padding:12px 22px;background:var(--s
 .sdot{width:8px;height:8px;border-radius:50%;background:var(--mut);}
 .sdot.ok{background:var(--grn);} .sdot.busy{background:var(--yel);animation:blink 1s infinite;} .sdot.err{background:var(--red);}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+@keyframes smPop{0%{transform:scale(.7);opacity:0;}100%{transform:scale(1);opacity:1;}}
 .slbl{font-size:11px;color:var(--mut);}
 
 .view{display:none;padding:22px;max-width:1300px;margin:0 auto;}
@@ -290,6 +291,15 @@ body.is-manager .mgr-only-inline { display:inline-block; }
 <!-- ════ QUOTE BANNER ════ -->
 <div id="quote-banner"></div>
 
+<!-- ════ SUCCESS MODAL ════ -->
+<div id="success-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);backdrop-filter:blur(5px);align-items:center;justify-content:center;">
+  <div style="background:var(--card);border:1px solid var(--bdr);border-radius:20px;padding:44px 38px;max-width:400px;width:92%;text-align:center;box-shadow:0 28px 80px rgba(0,0,0,.5);animation:smPop .28s cubic-bezier(.34,1.56,.64,1);">
+    <div style="font-size:70px;margin-bottom:18px;line-height:1;">✅</div>
+    <div id="success-modal-name" style="font-family:'Syne',sans-serif;font-size:21px;font-weight:700;color:var(--txt);margin-bottom:10px;"></div>
+    <div id="success-modal-msg" style="font-size:14px;color:var(--mut);line-height:1.7;margin-bottom:30px;"></div>
+    <button onclick="closeSuccessModal()" style="background:var(--grn);color:#fff;border:none;border-radius:10px;padding:12px 40px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .18s;" onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'">Done ✓</button>
+  </div>
+</div>
 <div id="ldr"><div class="spin"></div><div class="lmsg" id="lmsg">Loading TeamPulse...</div></div>
 
 <nav>
@@ -990,6 +1000,7 @@ function subM(){
       DB.set('tp_c',cis);
       setSS('ok','Saved ✓');
       toast('✅ Check-in saved to Sheets! '+tp+' task'+(tp!==1?'s':'')+' submitted.','s');
+      showSuccessModal(emp.name,'morning');
       clrM();
     })
     .catch(function(err){setSS('err','Sheet error');toast('Could not save to Sheets: '+err.message,'e');});
@@ -1025,11 +1036,12 @@ function updCfy(){
   var login=document.getElementById('e-login').value,logout=document.getElementById('e-logout').value,
       brk=+document.getElementById('e-brk').value||0,cfyVal=document.getElementById('e-cfy').value;
   var net=calcNet(login,logout,brk);
-  document.getElementById('e-sys').value=net>0?net.toFixed(2)+' hrs':'';
+  if(net>0){var nh=Math.floor(net),nm=Math.round((net-nh)*60);document.getElementById('e-sys').value=nh+'h '+String(nm).padStart(2,'0')+'m';}else{document.getElementById('e-sys').value='';}
   var dEl=document.getElementById('e-diff'),hEl=document.getElementById('e-dh');
   if(net>0&&cfyVal!==''){
     var cfy=+cfyVal,d=cfy-net,ad=Math.abs(d);
-    dEl.value=(d>=0?'+':'')+d.toFixed(2)+' hrs';
+    var dh=Math.floor(Math.abs(d)),dm=Math.round((Math.abs(d)-dh)*60);
+    dEl.value=(d>=0?'+':'-')+dh+'h '+String(dm).padStart(2,'0')+'m';
     if(ad<=.25){dEl.style.color='var(--grn)';hEl.style.color='var(--grn)';hEl.textContent='✅ Great match!';}
     else if(ad<=1){dEl.style.color='var(--yel)';hEl.style.color='var(--yel)';hEl.textContent='⚠️ Small gap — check break hrs.';}
     else{dEl.style.color='var(--red)';hEl.style.color='var(--red)';hEl.textContent='🔴 Large gap — verify Clockify.';}
@@ -1065,6 +1077,7 @@ function subE(){
       DB.set('tp_r',rpts);
       setSS('ok','Saved ✓');
       toast('📊 EOD saved to Sheets! Score: '+r.score+'/100 · '+r.band,'s');
+      showSuccessModal(emp.name,'eod');
       clrE();
     })
     .catch(function(err){setSS('err','Sheet error');toast('Could not save to Sheets: '+err.message,'e');});
@@ -1647,7 +1660,18 @@ function applySession() {
     sv('admin');
   } else {
     var hr = new Date().getHours();
-    sv(hr >= 15 ? 'eod' : 'morning');
+    var nowHH = String(new Date().getHours()).padStart(2,'0');
+    var nowMM = String(new Date().getMinutes()).padStart(2,'0');
+    var nowTime = nowHH + ':' + nowMM;
+    if (hr >= 15) {
+      sv('eod');
+      var eLogout = document.getElementById('e-logout');
+      if (eLogout && !eLogout.value) { eLogout.value = nowTime; updCfy(); }
+    } else {
+      sv('morning');
+      var mLogin = document.getElementById('m-login');
+      if (mLogin && !mLogin.value) { mLogin.value = nowTime; chkOT(); }
+    }
   }
 }
 
@@ -1727,6 +1751,17 @@ sv = function(v) {
   _svOriginal(v);
 };
 
+
+function showSuccessModal(name,type){
+  document.getElementById('success-modal-name').textContent=name+',';
+  document.getElementById('success-modal-msg').textContent=type==='morning'
+    ?'Your Morning Check-In has been successfully submitted! Have a productive day. ☀️'
+    :'Your EOD Report has been successfully submitted! Great work today. 🌙';
+  document.getElementById('success-modal').style.display='flex';
+}
+function closeSuccessModal(){
+  document.getElementById('success-modal').style.display='none';
+}
 
 window.onload = init;
 </script>
