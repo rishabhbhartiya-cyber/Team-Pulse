@@ -431,8 +431,26 @@ body.is-manager .mgr-only-inline { display:inline-block; }
   </div>
   <div class="card" style="margin-bottom:11px;"><h3>⏰ Time Tracking</h3>
     <div class="fg">
-      <div class="f"><label>Login Time (from morning)</label><input type="time" id="e-login"></div>
-      <div class="f"><label>Logout Time *</label><input type="time" id="e-logout" oninput="updCfy()"></div>
+      <div class="f">
+        <label>Login Time (from morning)</label>
+        <input type="hidden" id="e-login">
+        <div style="display:flex;gap:5px;align-items:center;">
+          <select id="e-login-h" onchange="syncTimePicker('e-login')" style="flex:1;background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:8px 6px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"></select>
+          <span style="color:var(--mut);font-weight:700;">:</span>
+          <select id="e-login-m" onchange="syncTimePicker('e-login')" style="flex:1;background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:8px 6px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"></select>
+          <select id="e-login-ap" onchange="syncTimePicker('e-login')" style="background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:8px 6px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"><option>AM</option><option>PM</option></select>
+        </div>
+      </div>
+      <div class="f">
+        <label>Logout Time *</label>
+        <input type="hidden" id="e-logout">
+        <div style="display:flex;gap:5px;align-items:center;">
+          <select id="e-logout-h" onchange="syncTimePicker('e-logout');updCfy();" style="flex:1;background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:8px 6px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"></select>
+          <span style="color:var(--mut);font-weight:700;">:</span>
+          <select id="e-logout-m" onchange="syncTimePicker('e-logout');updCfy();" style="flex:1;background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:8px 6px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"></select>
+          <select id="e-logout-ap" onchange="syncTimePicker('e-logout');updCfy();" style="background:var(--sur);border:1px solid var(--bdr);border-radius:7px;padding:8px 6px;color:var(--txt);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;"><option>AM</option><option>PM</option></select>
+        </div>
+      </div>
       <div class="f"><label>Break Hours</label><input type="number" id="e-brk" min="0" max="4" step="0.25" placeholder="0.5" oninput="updCfy()"></div>
     </div>
     <div class="cfy">
@@ -885,6 +903,7 @@ function init(){
   var now=new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true});
   document.getElementById('mlbl').textContent='Today · '+now;
   document.getElementById('elbl').textContent='Today · '+now;
+  initTimePickers();
 
   // Load cached data immediately for instant render
   initDashPeriodFilters();
@@ -997,6 +1016,50 @@ function subM(){
 function clrM(){['m-emp','m-mode','m-td'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});['m-login','m-tp'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});document.getElementById('m-team').value='';document.getElementById('m-ots').value='';}
 
 // ══════════════════════════════════════════════════
+//  12-HOUR TIME PICKER HELPERS
+// ══════════════════════════════════════════════════
+function initTimePickers(){
+  ['e-login','e-logout'].forEach(function(id){
+    var hSel=document.getElementById(id+'-h');
+    var mSel=document.getElementById(id+'-m');
+    if(!hSel||!mSel) return;
+    hSel.innerHTML='<option value="">--</option>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(h){return'<option value="'+h+'">'+h+'</option>';}).join('');
+    mSel.innerHTML='<option value="">--</option>'+['01','02','03','04',..........,'59'].map(function(m){return'<option value="'+m+'">'+m+'</option>';}).join('');
+  });
+}
+function syncTimePicker(id){
+  var h=document.getElementById(id+'-h').value;
+  var m=document.getElementById(id+'-m').value;
+  var ap=document.getElementById(id+'-ap').value;
+  if(!h||!m){document.getElementById(id).value='';return;}
+  var h24=+h;
+  if(ap==='AM'&&h24===12) h24=0;
+  else if(ap==='PM'&&h24!==12) h24+=12;
+  document.getElementById(id).value=String(h24).padStart(2,'0')+':'+m;
+}
+function setTimePicker(id, val24){
+  // val24 = "HH:MM" in 24h format
+  if(!val24){
+    document.getElementById(id+'-h').value='';
+    document.getElementById(id+'-m').value='';
+    document.getElementById(id+'-ap').value='AM';
+    document.getElementById(id).value='';
+    return;
+  }
+  var parts=val24.split(':');
+  var h24=+parts[0], m=parts[1]||'00';
+  // round minutes to nearest 5
+  var mRound=Math.round(+m/5)*5; if(mRound===60) mRound=55;
+  var mStr=String(mRound).padStart(2,'0');
+  var ap=h24>=12?'PM':'AM';
+  var h12=h24%12||12;
+  document.getElementById(id+'-h').value=String(h12);
+  document.getElementById(id+'-m').value=mStr;
+  document.getElementById(id+'-ap').value=ap;
+  document.getElementById(id).value=String(h24).padStart(2,'0')+':'+mStr;
+}
+
+// ══════════════════════════════════════════════════
 //  EOD REPORT
 // ══════════════════════════════════════════════════
 function onEE(){
@@ -1006,7 +1069,7 @@ function onEE(){
   var ci=cis.find(function(c){return c.empId===eid&&c.date===date;});
   var stEl=document.getElementById('e-cistatus'),hEl=document.getElementById('e-thhint');
   if(ci){
-    document.getElementById('e-login').value=ci.loginTime;
+    setTimePicker('e-login', ci.loginTime);
     document.getElementById('e-moded').value=ci.mode==='Remote'?'🏠 Remote':'🏢 Office';
     document.getElementById('e-tpl').value=ci.tasksPlanned;
     hEl.style.display='block';
@@ -1014,7 +1077,7 @@ function onEE(){
     stEl.style.display='block';
     stEl.innerHTML='<div style="padding:7px 10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:7px;font-size:12px;"><span style="color:var(--grn);font-weight:600;">✅ Morning check-in found</span> · In at '+f12(ci.loginTime)+'</div>';
   } else {
-    document.getElementById('e-login').value='';document.getElementById('e-moded').value='';document.getElementById('e-tpl').value='';
+    setTimePicker('e-login','');document.getElementById('e-moded').value='';document.getElementById('e-tpl').value='';
     hEl.style.display='none';
     stEl.style.display='block';
     stEl.innerHTML='<div style="padding:7px 10px;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);border-radius:7px;font-size:12px;"><span style="color:var(--yel);">⚠️ No morning check-in found.</span> Fill login time manually.</div>';
@@ -1069,7 +1132,7 @@ function subE(){
     })
     .catch(function(err){setSS('err','Sheet error');toast('Could not save to Sheets: '+err.message,'e');});
 }
-function clrE(){['e-emp','e-tdx','e-pnd','e-blk','e-sup','e-tmr'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['e-logout','e-brk','e-prod','e-meet','e-adm','e-tdn','e-cfy'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['r-q','r-r','r-o'].forEach(function(id){document.querySelectorAll('#'+id+' .rb').forEach(function(b){b.classList.remove('on');});});document.getElementById('e-login').value='';document.getElementById('e-moded').value='';document.getElementById('e-tpl').value='';document.getElementById('e-team').value='';document.getElementById('e-cistatus').style.display='none';document.getElementById('e-thhint').style.display='none';updCfy();}
+function clrE(){['e-emp','e-tdx','e-pnd','e-blk','e-sup','e-tmr'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['e-brk','e-prod','e-meet','e-adm','e-tdn','e-cfy'].forEach(function(id){var el=document.getElementById(id);if(el)el.value='';});['r-q','r-r','r-o'].forEach(function(id){document.querySelectorAll('#'+id+' .rb').forEach(function(b){b.classList.remove('on');});});setTimePicker('e-login','');setTimePicker('e-logout','');document.getElementById('e-moded').value='';document.getElementById('e-tpl').value='';document.getElementById('e-team').value='';document.getElementById('e-cistatus').style.display='none';document.getElementById('e-thhint').style.display='none';updCfy();}
 
 // ══════════════════════════════════════════════════
 //  DASHBOARD
