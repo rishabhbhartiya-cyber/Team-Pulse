@@ -511,6 +511,8 @@ body.is-manager .mgr-only-inline { display:inline-block; }
     <div class="f">
       <label>Filter</label>
       <select id="a-period-type" onchange="onDashPeriodTypeChange()">
+        <option value="today">Today</option>
+        <option value="thisweek">This Week</option>
         <option value="week">Weekly</option>
         <option value="month" selected>Monthly</option>
         <option value="quarter">Quarterly</option>
@@ -1139,6 +1141,7 @@ function onDashPeriodTypeChange(doRender){
   var typeEl = document.getElementById('a-period-type');
   if(!typeEl) return;
   var type = typeEl.value;
+  document.getElementById('a-year-wrap').classList.toggle('pf-hide', type==='today' || type==='thisweek');
   document.getElementById('a-month-wrap').classList.toggle('pf-hide', !(type==='week' || type==='month'));
   document.getElementById('a-week-wrap').classList.toggle('pf-hide', type!=='week');
   document.getElementById('a-quarter-wrap').classList.toggle('pf-hide', type!=='quarter');
@@ -1153,7 +1156,19 @@ function getDashPeriodRange(){
   var y = +(yearEl && yearEl.value ? yearEl.value : new Date().getFullYear());
   var start, end, label;
 
-  if(type === 'week'){
+  if(type === 'today'){
+    var today = new Date();
+    start = today; end = today;
+    label = 'Today (' + fmtDashDate(today) + ')';
+  } else if(type === 'thisweek'){
+    var now2 = new Date();
+    var day = now2.getDay(); // 0=Sun
+    var monOffset = (day === 0) ? -6 : 1 - day;
+    var mon = new Date(now2); mon.setDate(now2.getDate() + monOffset);
+    var sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    start = mon; end = sun;
+    label = 'This Week (' + fmtDashDate(mon) + ' – ' + fmtDashDate(sun) + ')';
+  } else if(type === 'week'){
     var m = +document.getElementById('a-month').value;
     var w = +document.getElementById('a-week').value;
     var sDay = ((w-1)*7)+1;
