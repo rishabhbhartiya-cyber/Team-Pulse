@@ -21,7 +21,6 @@ nav{display:flex;align-items:center;gap:8px;padding:12px 22px;background:var(--s
 .sync-wrap{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .sdot{width:8px;height:8px;border-radius:50%;background:var(--mut);}
 .sdot.ok{background:var(--grn);} .sdot.busy{background:var(--yel);animation:blink 1s infinite;} .sdot.err{background:var(--red);}
-@keyframes smPop{0%{transform:scale(.7);opacity:0;}100%{transform:scale(1);opacity:1;}}
 @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
 .slbl{font-size:11px;color:var(--mut);}
 
@@ -291,15 +290,6 @@ body.is-manager .mgr-only-inline { display:inline-block; }
 <!-- ════ QUOTE BANNER ════ -->
 <div id="quote-banner"></div>
 
-<!-- ════ SUCCESS MODAL ════ -->
-<div id="success-modal" style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);align-items:center;justify-content:center;">
-  <div id="success-modal-box" style="background:var(--card);border:1px solid var(--bdr);border-radius:20px;padding:40px 36px;max-width:380px;width:90%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.4);animation:smPop .28s cubic-bezier(.34,1.56,.64,1);">
-    <div id="success-modal-icon" style="font-size:64px;margin-bottom:16px;line-height:1;">✅</div>
-    <div id="success-modal-name" style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--txt);margin-bottom:8px;"></div>
-    <div id="success-modal-msg" style="font-size:14px;color:var(--mut);line-height:1.6;margin-bottom:28px;"></div>
-    <button onclick="closeSuccessModal()" style="background:var(--grn);color:#fff;border:none;border-radius:10px;padding:11px 36px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .18s;" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Done</button>
-  </div>
-</div>
 <div id="ldr"><div class="spin"></div><div class="lmsg" id="lmsg">Loading TeamPulse...</div></div>
 
 <nav>
@@ -453,7 +443,7 @@ body.is-manager .mgr-only-inline { display:inline-block; }
       <div class="fg" style="grid-template-columns:repeat(auto-fill,minmax(170px,1fr));">
         <div class="f"><label>Clockify Total Hours *</label>
           <input type="number" id="e-cfy" min="0" max="16" step="0.25" placeholder="e.g. 7.5" oninput="updCfy()">
-          <div style="font-size:10px;color:var(--mut);margin-top:3px;">Clockify → Dashboard → Today's total (decimal, e.g. 7.5 = 7h 30m)</div>
+          <div style="font-size:10px;color:var(--mut);margin-top:3px;">Clockify → Dashboard → Today's total</div>
         </div>
         <div class="f"><label>System Hrs (Login→Logout−Break)</label>
           <input id="e-sys" readonly style="opacity:.7;font-weight:600;" placeholder="Auto-calc">
@@ -521,6 +511,8 @@ body.is-manager .mgr-only-inline { display:inline-block; }
     <div class="f">
       <label>Filter</label>
       <select id="a-period-type" onchange="onDashPeriodTypeChange()">
+        <option value="today">Today</option>
+        <option value="thisweek">This Week</option>
         <option value="week">Weekly</option>
         <option value="month" selected>Monthly</option>
         <option value="quarter">Quarterly</option>
@@ -998,7 +990,6 @@ function subM(){
       DB.set('tp_c',cis);
       setSS('ok','Saved ✓');
       toast('✅ Check-in saved to Sheets! '+tp+' task'+(tp!==1?'s':'')+' submitted.','s');
-      showSuccessModal(emp.name, 'morning');
       clrM();
     })
     .catch(function(err){setSS('err','Sheet error');toast('Could not save to Sheets: '+err.message,'e');});
@@ -1034,13 +1025,11 @@ function updCfy(){
   var login=document.getElementById('e-login').value,logout=document.getElementById('e-logout').value,
       brk=+document.getElementById('e-brk').value||0,cfyVal=document.getElementById('e-cfy').value;
   var net=calcNet(login,logout,brk);
-  if(net>0){var nh=Math.floor(net),nm=Math.round((net-nh)*60);document.getElementById('e-sys').value=nh+'h '+String(nm).padStart(2,'0')+'m';}else{document.getElementById('e-sys').value='';}
+  document.getElementById('e-sys').value=net>0?net.toFixed(2)+' hrs':'';
   var dEl=document.getElementById('e-diff'),hEl=document.getElementById('e-dh');
   if(net>0&&cfyVal!==''){
     var cfy=+cfyVal,d=cfy-net,ad=Math.abs(d);
-    var dh=Math.floor(Math.abs(d)),dm=Math.round((Math.abs(d)-dh)*60);
-    var dSign=d>=0?'+':'-';
-    dEl.value=dSign+dh+'h '+String(dm).padStart(2,'0')+'m';
+    dEl.value=(d>=0?'+':'')+d.toFixed(2)+' hrs';
     if(ad<=.25){dEl.style.color='var(--grn)';hEl.style.color='var(--grn)';hEl.textContent='✅ Great match!';}
     else if(ad<=1){dEl.style.color='var(--yel)';hEl.style.color='var(--yel)';hEl.textContent='⚠️ Small gap — check break hrs.';}
     else{dEl.style.color='var(--red)';hEl.style.color='var(--red)';hEl.textContent='🔴 Large gap — verify Clockify.';}
@@ -1076,7 +1065,6 @@ function subE(){
       DB.set('tp_r',rpts);
       setSS('ok','Saved ✓');
       toast('📊 EOD saved to Sheets! Score: '+r.score+'/100 · '+r.band,'s');
-      showSuccessModal(emp.name, 'eod');
       clrE();
     })
     .catch(function(err){setSS('err','Sheet error');toast('Could not save to Sheets: '+err.message,'e');});
@@ -1153,6 +1141,7 @@ function onDashPeriodTypeChange(doRender){
   var typeEl = document.getElementById('a-period-type');
   if(!typeEl) return;
   var type = typeEl.value;
+  document.getElementById('a-year-wrap').classList.toggle('pf-hide', type==='today' || type==='thisweek');
   document.getElementById('a-month-wrap').classList.toggle('pf-hide', !(type==='week' || type==='month'));
   document.getElementById('a-week-wrap').classList.toggle('pf-hide', type!=='week');
   document.getElementById('a-quarter-wrap').classList.toggle('pf-hide', type!=='quarter');
@@ -1167,7 +1156,19 @@ function getDashPeriodRange(){
   var y = +(yearEl && yearEl.value ? yearEl.value : new Date().getFullYear());
   var start, end, label;
 
-  if(type === 'week'){
+  if(type === 'today'){
+    var today = new Date();
+    start = today; end = today;
+    label = 'Today (' + fmtDashDate(today) + ')';
+  } else if(type === 'thisweek'){
+    var now2 = new Date();
+    var day = now2.getDay(); // 0=Sun
+    var monOffset = (day === 0) ? -6 : 1 - day;
+    var mon = new Date(now2); mon.setDate(now2.getDate() + monOffset);
+    var sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    start = mon; end = sun;
+    label = 'This Week (' + fmtDashDate(mon) + ' – ' + fmtDashDate(sun) + ')';
+  } else if(type === 'week'){
     var m = +document.getElementById('a-month').value;
     var w = +document.getElementById('a-week').value;
     var sDay = ((w-1)*7)+1;
@@ -1646,20 +1647,7 @@ function applySession() {
     sv('admin');
   } else {
     var hr = new Date().getHours();
-    var nowHH = String(new Date().getHours()).padStart(2,'0');
-    var nowMM = String(new Date().getMinutes()).padStart(2,'0');
-    var nowTime = nowHH + ':' + nowMM;
-    if (hr >= 15) {
-      sv('eod');
-      // Auto-fill logout time for EOD sign-in
-      var eLogout = document.getElementById('e-logout');
-      if (eLogout && !eLogout.value) { eLogout.value = nowTime; updCfy(); }
-    } else {
-      sv('morning');
-      // Auto-fill login time for morning check-in
-      var mLogin = document.getElementById('m-login');
-      if (mLogin && !mLogin.value) { mLogin.value = nowTime; chkOT(); }
-    }
+    sv(hr >= 15 ? 'eod' : 'morning');
   }
 }
 
@@ -1739,19 +1727,6 @@ sv = function(v) {
   _svOriginal(v);
 };
 
-
-function showSuccessModal(name, type) {
-  var modal = document.getElementById('success-modal');
-  document.getElementById('success-modal-name').textContent = name + ',';
-  document.getElementById('success-modal-msg').textContent =
-    type === 'morning'
-      ? 'Your Morning Check-In has been successfully submitted! Have a productive day. ☀️'
-      : 'Your EOD Report has been successfully submitted! Great work today. 🌙';
-  modal.style.display = 'flex';
-}
-function closeSuccessModal() {
-  document.getElementById('success-modal').style.display = 'none';
-}
 
 window.onload = init;
 </script>
