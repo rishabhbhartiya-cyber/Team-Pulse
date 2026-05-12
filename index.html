@@ -1024,7 +1024,7 @@ function initTimePickers(){
     var mSel=document.getElementById(id+'-m');
     if(!hSel||!mSel) return;
     hSel.innerHTML='<option value="">--</option>'+[1,2,3,4,5,6,7,8,9,10,11,12].map(function(h){return'<option value="'+h+'">'+h+'</option>';}).join('');
-    mSel.innerHTML='<option value="">--</option>'+['01','02','03','04',..........,'59'].map(function(m){return'<option value="'+m+'">'+m+'</option>';}).join('');
+    mSel.innerHTML='<option value="">--</option>'+['00','05','10','15','20','25','30','35','40','45','50','55'].map(function(m){return'<option value="'+m+'">'+m+'</option>';}).join('');
   });
 }
 function syncTimePicker(id){
