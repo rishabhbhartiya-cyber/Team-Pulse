@@ -691,7 +691,9 @@ var rpts    = DB.get('tp_r')   || [];
 var lastSyn = DB.get('tp_ls')  || '';
 
 // ══════════════════════════════════════════════════
-//  JSONP BRIDGE — the ONLY reliable way from GitHub Pages → GAS
+//  JSONP BRIDGE — only reliable method from GitHub Pages → GAS
+//  GAS does not send CORS headers so fetch() is always blocked.
+//  Uses callback= param which Code.gs supports (params.cb || params.callback).
 // ══════════════════════════════════════════════════
 var _cbIdx = 0;
 function jsonp(url, timeout) {
@@ -704,8 +706,8 @@ function jsonp(url, timeout) {
       if (done) return;
       done = true;
       cleanup();
-      reject(new Error('Request timed out after ' + (timeout||15) + 's'));
-    }, (timeout || 15) * 1000);
+      reject(new Error('Request timed out after ' + (timeout||30) + 's'));
+    }, (timeout || 30) * 1000);
 
     window[cbName] = function(data) {
       if (done) return;
@@ -723,9 +725,9 @@ function jsonp(url, timeout) {
       reject(new Error('Script load error — check your Web App URL'));
     };
 
-    // Append callback param
+    // callback= is supported by Code.gs (params.cb || params.callback)
     var sep = url.indexOf('?') >= 0 ? '&' : '?';
-    script.src = url + sep + 'cb=' + cbName;
+    script.src = url + sep + 'callback=' + cbName;
     document.head.appendChild(script);
 
     function cleanup() {
@@ -735,7 +737,6 @@ function jsonp(url, timeout) {
   });
 }
 
-// Encode data object as a single URL param
 function gasCall(action, data) {
   if (!GAS_URL) return Promise.reject(new Error('No URL configured'));
   var url = GAS_URL + '?action=' + encodeURIComponent(action);
@@ -751,10 +752,8 @@ function gasCall(action, data) {
 function loadAll() {
   if (!GAS_URL) { setSS('err','No URL set'); hideLdr(); return; }
   setSS('busy','Syncing...');
-  // Only show the full-screen loader if the user hasn't logged in yet (avoids blocking mobile UI)
-  if (!currentUser) {
-    showLdr('Loading from Google Sheets...');
-  }
+  // Only show full-screen loader if the user hasn't logged in yet
+  if (!currentUser) { showLdr('Loading from Google Sheets...'); }
   gasCall('getAll')
     .then(function(d) {
       if (!d || !d.ok) throw new Error(d ? d.error : 'No response');
@@ -765,7 +764,7 @@ function loadAll() {
       lastSyn = new Date().toLocaleTimeString();
       DB.set('tp_ls', lastSyn);
       setSS('ok', 'Synced ✓');
-      // Re-populate login dropdown with fresh employee list from Sheets
+      // Re-populate login dropdown with fresh employees from Sheets
       initLoginDropdown();
       popDDs(); initDashPeriodFilters(); renderD();
       updSetupStatus();
@@ -773,15 +772,10 @@ function loadAll() {
     })
     .catch(function(err) {
       setSS('err', 'Sync failed');
-      // Helpful error for end users on shared devices
       var msg = err.message.indexOf('timed out') >= 0
-        ? 'Sheet connection timed out. Using cached data. Check your internet connection.'
+        ? 'Google Sheet connection timed out. Check your internet connection.'
         : 'Could not reach Google Sheets: ' + err.message;
       toast(msg, 'e');
-      // If no cached employees, show a clearer message
-      if (emps.length === 0) {
-        toast('No cached data. Please check your internet connection and reload.', 'e');
-      }
       // If manager is logged in, offer to go to setup
       if (currentUser && currentUser.role === 'manager') {
         setTimeout(function() { toast('Manager: check DB Setup tab if URL is wrong.', 'i'); }, 3500);
@@ -905,12 +899,12 @@ function init(){
   document.getElementById('mlbl').textContent='Today · '+now;
   document.getElementById('elbl').textContent='Today · '+now;
 
-  // Load cached data immediately for instant render (critical for mobile — no waiting on network)
+  // Load cached data immediately for instant render
   initDashPeriodFilters();
   if(emps.length>0){popDDs();renderD();}
 
-  // Init login dropdown immediately using cached employees so mobile users can log in
-  // even before the Google Sheet fetch completes
+  // Init login dropdown immediately using cached employees
+  // (critical for mobile — don't wait for network fetch)
   initLoginDropdown();
   applyTheme();
 
@@ -929,7 +923,7 @@ function init(){
     document.getElementById('login-screen').classList.add('h');
     applySession();
   } else {
-    // Show login screen immediately — don't wait for the network fetch
+    // Show login immediately — don't wait for network
     hideLdr();
   }
 
@@ -1556,7 +1550,357 @@ function remE(id){if(!confirm('Remove this employee?'))return;emps=emps.filter(f
 //  DOWNLOAD Code.gs HELPER
 // ══════════════════════════════════════════════════
 function dlGS(){
-  toast('Download the Code.gs file from the files shared with you alongside this app.','i');
+  var code = `// TeamPulse Google Apps Script backend
+// Paste this full file into Apps Script, run setupSheets once, then deploy as Web App.
+// Deploy settings: Execute as Me | Who has access: Anyone (not "Anyone with Google account")
+
+const SPREADSHEET_ID = "1vsBbw_81CtR3ONBe-2PxorxArmYm_m-zhoRN4BqXSTU";
+
+const SHEET_CI = "MorningCheckIns";
+const SHEET_EOD = "EODReports";
+const SHEET_EMPS = "Employees";
+
+const HEADERS = {
+  ci: [
+    "ID", "Date", "Employee ID", "Employee Name", "Team", "Work Mode",
+    "Login Time", "On Time", "Tasks Planned", "Task Description", "Submitted At"
+  ],
+  eod: [
+    "ID", "Date", "Employee ID", "Employee Name", "Team", "Work Mode",
+    "Login Time", "Logout Time", "Break Hrs", "Net Hours", "Clockify Hrs", "Clockify Diff",
+    "Productive Hrs", "Meeting Hrs", "Admin Hrs",
+    "Tasks Planned", "Tasks Done", "Completion %",
+    "Tasks Done Text", "Pending Tasks",
+    "Quality (1-5)", "Responsiveness (1-5)", "Ownership (1-5)",
+    "Productivity Score", "Band",
+    "Blockers", "Support Needed", "Plan Tomorrow", "On Time", "Submitted At"
+  ],
+  employees: ["ID", "Name", "Team", "Manager", "Shift Start", "Status", "Added At"]
+};
+
+const DEMO_EMPLOYEES = [
+  ["E001", "Rahul Sharma", "Team A", "Manager", "09:00", "Active"],
+  ["E002", "Priya Verma", "Team B", "Manager", "09:00", "Active"],
+  ["E003", "Amit Gupta", "Team C", "Manager", "09:00", "Active"],
+  ["E004", "Sneha Joshi", "Team A", "Manager", "09:30", "Active"],
+  ["E005", "Karan Mehta", "Team B", "Manager", "09:00", "Active"]
+];
+
+function doGet(e) {
+  return handleRequest(e);
+}
+
+function doPost(e) {
+  return handleRequest(e);
+}
+
+function handleRequest(e) {
+  const params = (e && e.parameter) || {};
+  // Support both callback= (sent by the app) and cb= (legacy)
+  const callback = params.callback || params.cb || "";
+
+  try {
+    let action = params.action || "";
+    let data = undefined;
+
+    if (params.d) {
+      data = parseJsonParam(params.d);
+    }
+
+    if (params.payload) {
+      const payload = parseJsonParam(params.payload);
+      action = payload.action || action;
+      data = payload.data !== undefined ? payload.data : payload;
+    }
+
+    if (e && e.postData && e.postData.contents) {
+      const body = JSON.parse(e.postData.contents);
+      action = body.action || action;
+      data = body.data !== undefined ? body.data : body;
+    }
+
+    if (!action) action = "getAll";
+    return jsonResponse(route(action, data), callback);
+  } catch (err) {
+    return jsonResponse({ ok: false, error: err.message }, callback);
+  }
+}
+
+function route(action, data) {
+  switch (String(action || "")) {
+    case "ping":
+      ensureSheets(false);
+      return { ok: true, spreadsheetId: SPREADSHEET_ID };
+    case "getAll":
+    case "getAllData":
+      return getAllData();
+    case "getEmps":
+    case "getEmployees":
+      return getEmployees();
+    case "saveCI":
+    case "saveCheckin":
+      return saveCheckin(data);
+    case "saveEOD":
+      return saveEOD(data);
+    case "saveEmp":
+    case "saveEmployee":
+      return saveEmployee(data);
+    case "delReport":
+    case "deleteReport":
+      return deleteReport(data);
+    case "updateScore":
+      return updateScore(data);
+    default:
+      return { ok: false, error: "Unknown action: " + action };
+  }
+}
+
+function parseJsonParam(value) {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string") return value;
+  try {
+    return JSON.parse(value);
+  } catch (firstErr) {
+    try {
+      return JSON.parse(decodeURIComponent(value));
+    } catch (secondErr) {
+      throw new Error("Invalid JSON payload");
+    }
+  }
+}
+
+function jsonResponse(obj, callback) {
+  const json = JSON.stringify(obj);
+  const safeCallback = /^[A-Za-z_$][0-9A-Za-z_$]*$/.test(callback || "");
+  if (safeCallback) {
+    return ContentService
+      .createTextOutput(callback + "(" + json + ");")
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService
+    .createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function setupSheets() {
+  ensureSheets(true);
+  SpreadsheetApp.flush();
+  return "Setup complete. Deploy or redeploy the Web App as a new version.";
+}
+
+function ensureSheets(seedEmployees) {
+  if (!SPREADSHEET_ID || SPREADSHEET_ID === "YOUR_SPREADSHEET_ID_HERE") {
+    throw new Error("Set SPREADSHEET_ID to your Google Sheet ID.");
+  }
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  ensureSheet(ss, SHEET_CI, HEADERS.ci, "#1a2a1a");
+  ensureSheet(ss, SHEET_EOD, HEADERS.eod, "#1a1a2e");
+  const employees = ensureSheet(ss, SHEET_EMPS, HEADERS.employees, "#1a1a2e");
+  if (seedEmployees && employees.getLastRow() === 1) {
+    const now = new Date().toISOString();
+    employees
+      .getRange(2, 1, DEMO_EMPLOYEES.length, HEADERS.employees.length)
+      .setValues(DEMO_EMPLOYEES.map(function(row) { return row.concat([now]); }));
+  }
+  return ss;
+}
+
+function ensureSheet(ss, name, headers, headerColor) {
+  let sheet = ss.getSheetByName(name);
+  if (!sheet) sheet = ss.insertSheet(name);
+  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  sheet.getRange(1, 1, 1, headers.length)
+    .setFontWeight("bold")
+    .setBackground(headerColor)
+    .setFontColor("#ffffff");
+  sheet.setFrozenRows(1);
+  return sheet;
+}
+
+function getAllData() {
+  const ss = ensureSheets(false);
+  return {
+    ok: true,
+    checkins: sheetToObjects(ss.getSheetByName(SHEET_CI)),
+    reports: sheetToObjects(ss.getSheetByName(SHEET_EOD)),
+    employees: sheetToObjects(ss.getSheetByName(SHEET_EMPS))
+  };
+}
+
+function getEmployees() {
+  const ss = ensureSheets(false);
+  return { ok: true, employees: sheetToObjects(ss.getSheetByName(SHEET_EMPS)) };
+}
+
+function sheetToObjects(sheet) {
+  if (!sheet || sheet.getLastRow() < 2) return [];
+  const data = sheet.getDataRange().getDisplayValues();
+  const headers = data[0];
+  return data.slice(1).map(function(row) {
+    const obj = {};
+    headers.forEach(function(header, i) {
+      obj[header] = row[i] !== undefined ? row[i] : "";
+    });
+    return obj;
+  });
+}
+
+function saveCheckin(d) {
+  requireData(d, "check-in");
+  return withLock(function() {
+    const ss = ensureSheets(false);
+    const sheet = ss.getSheetByName(SHEET_CI);
+    const data = sheet.getDataRange().getDisplayValues();
+    const id = d.id || Date.now();
+    const row = [
+      id, d.date, d.empId, d.empName, d.team, d.mode,
+      d.loginTime, yesNo(d.onTime), Number(d.tasksPlanned || 0), d.taskDesc || "", d.submittedAt || new Date().toISOString()
+    ];
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][2]) === String(d.empId) && String(data[i][1]) === String(d.date)) {
+        row[0] = data[i][0] || id;
+        sheet.getRange(i + 1, 1, 1, HEADERS.ci.length).setValues([row]);
+        SpreadsheetApp.flush();
+        return { ok: true, success: true, action: "updated", id: row[0] };
+      }
+    }
+    sheet.appendRow(row);
+    SpreadsheetApp.flush();
+    return { ok: true, success: true, action: "created", id: id };
+  });
+}
+
+function saveEOD(d) {
+  requireData(d, "EOD report");
+  return withLock(function() {
+    const ss = ensureSheets(false);
+    const sheet = ss.getSheetByName(SHEET_EOD);
+    const data = sheet.getDataRange().getDisplayValues();
+    const tasksPlanned = Number(d.tasksPlanned || 0);
+    const tasksDone = Number(d.tasksDone || 0);
+    const netHrs = Number(d.netHrs || 0);
+    const hasClockify = d.clockifyHrs !== null && d.clockifyHrs !== undefined && d.clockifyHrs !== "";
+    const clockifyHrs = hasClockify ? Number(d.clockifyHrs) : "";
+    const diff = hasClockify ? (Number(clockifyHrs) - netHrs).toFixed(2) : "";
+    const pct = tasksPlanned > 0 ? Math.round((tasksDone / tasksPlanned) * 100) + "%" : "0%";
+    const id = d.id || Date.now();
+    const row = [
+      id, d.date, d.empId, d.empName, d.team, d.mode,
+      d.loginTime, d.logoutTime, Number(d.breakHrs || 0), netHrs, clockifyHrs, diff,
+      Number(d.prodHrs || 0), Number(d.meetHrs || 0), Number(d.adminHrs || 0),
+      tasksPlanned, tasksDone, pct,
+      d.taskDoneText || "", d.pending || "",
+      Number(d.quality || 3), Number(d.responsiveness || 3), Number(d.ownership || 3),
+      Number(d.score || 0), d.band || "",
+      d.blocker || "", d.support || "", d.tomorrow || "",
+      yesNo(d.onTime), d.submittedAt || new Date().toISOString()
+    ];
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][2]) === String(d.empId) && String(data[i][1]) === String(d.date)) {
+        row[0] = data[i][0] || id;
+        sheet.getRange(i + 1, 1, 1, HEADERS.eod.length).setValues([row]);
+        colorRow(sheet, i + 1, d.band);
+        SpreadsheetApp.flush();
+        return { ok: true, success: true, action: "updated", id: row[0] };
+      }
+    }
+    sheet.appendRow(row);
+    colorRow(sheet, sheet.getLastRow(), d.band);
+    SpreadsheetApp.flush();
+    return { ok: true, success: true, action: "created", id: id };
+  });
+}
+
+function saveEmployee(d) {
+  requireData(d, "employee");
+  return withLock(function() {
+    const ss = ensureSheets(false);
+    const sheet = ss.getSheetByName(SHEET_EMPS);
+    const data = sheet.getDataRange().getDisplayValues();
+    const row = [
+      d.id, d.name, d.team, d.manager || "Manager",
+      d.shift || "09:00", d.status || "Active", new Date().toISOString()
+    ];
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(d.id)) {
+        sheet.getRange(i + 1, 1, 1, HEADERS.employees.length).setValues([row]);
+        SpreadsheetApp.flush();
+        return { ok: true, success: true, action: "updated", id: d.id };
+      }
+    }
+    sheet.appendRow(row);
+    SpreadsheetApp.flush();
+    return { ok: true, success: true, action: "created", id: d.id };
+  });
+}
+
+function deleteReport(d) {
+  const reportId = typeof d === "object" && d !== null ? d.id : d;
+  if (!reportId) throw new Error("Missing report ID");
+  return withLock(function() {
+    const ss = ensureSheets(false);
+    const sheet = ss.getSheetByName(SHEET_EOD);
+    const data = sheet.getDataRange().getDisplayValues();
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(reportId)) {
+        sheet.deleteRow(i + 1);
+        SpreadsheetApp.flush();
+        return { ok: true, success: true };
+      }
+    }
+    return { ok: false, error: "Row not found" };
+  });
+}
+
+function updateScore(d) {
+  requireData(d, "score update");
+  return withLock(function() {
+    const ss = ensureSheets(false);
+    const sheet = ss.getSheetByName(SHEET_EOD);
+    const data = sheet.getDataRange().getDisplayValues();
+    const headers = data[0];
+    const col = function(name) { return headers.indexOf(name) + 1; };
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(d.id)) {
+        sheet.getRange(i + 1, col("Quality (1-5)")).setValue(Number(d.quality || 3));
+        sheet.getRange(i + 1, col("Responsiveness (1-5)")).setValue(Number(d.responsiveness || 3));
+        sheet.getRange(i + 1, col("Ownership (1-5)")).setValue(Number(d.ownership || 3));
+        sheet.getRange(i + 1, col("Productivity Score")).setValue(Number(d.score || 0));
+        sheet.getRange(i + 1, col("Band")).setValue(d.band || "");
+        colorRow(sheet, i + 1, d.band);
+        SpreadsheetApp.flush();
+        return { ok: true, success: true };
+      }
+    }
+    return { ok: false, error: "Row not found" };
+  });
+}
+
+function colorRow(sheet, rowNum, band) {
+  const colors = { Excellent: "#0d3321", Good: "#0d1f3c", Acceptable: "#2a1c00", Watch: "#3c0d0d" };
+  sheet.getRange(rowNum, 1, 1, HEADERS.eod.length).setBackground(colors[band] || "#ffffff");
+}
+
+function withLock(fn) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try { return fn(); } finally { lock.releaseLock(); }
+}
+
+function requireData(d, label) {
+  if (d === undefined || d === null || d === "") throw new Error("Missing " + label + " data");
+}
+
+function yesNo(value) {
+  return value === true || value === "true" || value === "Yes" ? "Yes" : "No";
+}`;
+
+  var blob = new Blob([code], {type:'text/plain'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Code.gs';
+  a.click();
+  toast('⬇ Code.gs downloaded!','s');
 }
 
 // ══════════════════════════════════════════════════
