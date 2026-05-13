@@ -742,7 +742,7 @@ function gasCall(action, data) {
   if (data !== undefined) {
     url += '&d=' + encodeURIComponent(JSON.stringify(data));
   }
-  return jsonp(url, 20);
+  return jsonp(url, 30);
 }
 
 // ══════════════════════════════════════════════════
@@ -751,7 +751,10 @@ function gasCall(action, data) {
 function loadAll() {
   if (!GAS_URL) { setSS('err','No URL set'); hideLdr(); return; }
   setSS('busy','Syncing...');
-  showLdr('Loading from Google Sheets...');
+  // Only show the full-screen loader if the user hasn't logged in yet (avoids blocking mobile UI)
+  if (!currentUser) {
+    showLdr('Loading from Google Sheets...');
+  }
   gasCall('getAll')
     .then(function(d) {
       if (!d || !d.ok) throw new Error(d ? d.error : 'No response');
@@ -762,7 +765,9 @@ function loadAll() {
       lastSyn = new Date().toLocaleTimeString();
       DB.set('tp_ls', lastSyn);
       setSS('ok', 'Synced ✓');
-      popDDs(); initDashPeriodFilters(); renderD(); initLoginDropdown();
+      // Re-populate login dropdown with fresh employee list from Sheets
+      initLoginDropdown();
+      popDDs(); initDashPeriodFilters(); renderD();
       updSetupStatus();
       toast('✅ Synced from Google Sheets!', 's');
     })
@@ -770,9 +775,13 @@ function loadAll() {
       setSS('err', 'Sync failed');
       // Helpful error for end users on shared devices
       var msg = err.message.indexOf('timed out') >= 0
-        ? 'Google Sheet connection timed out. Check your internet connection.'
+        ? 'Sheet connection timed out. Using cached data. Check your internet connection.'
         : 'Could not reach Google Sheets: ' + err.message;
       toast(msg, 'e');
+      // If no cached employees, show a clearer message
+      if (emps.length === 0) {
+        toast('No cached data. Please check your internet connection and reload.', 'e');
+      }
       // If manager is logged in, offer to go to setup
       if (currentUser && currentUser.role === 'manager') {
         setTimeout(function() { toast('Manager: check DB Setup tab if URL is wrong.', 'i'); }, 3500);
@@ -896,10 +905,14 @@ function init(){
   document.getElementById('mlbl').textContent='Today · '+now;
   document.getElementById('elbl').textContent='Today · '+now;
 
-  // Load cached data immediately for instant render
+  // Load cached data immediately for instant render (critical for mobile — no waiting on network)
   initDashPeriodFilters();
   if(emps.length>0){popDDs();renderD();}
 
+  // Init login dropdown immediately using cached employees so mobile users can log in
+  // even before the Google Sheet fetch completes
+  initLoginDropdown();
+  applyTheme();
 
   // Restore session
   var savedUser = DB.get('tp_cu');
@@ -911,15 +924,12 @@ function init(){
     }
   }
 
-  // Init login dropdown after emps loaded
-  initLoginDropdown();
-  applyTheme();
-
   if (savedUser && savedUser.id) {
     currentUser = savedUser;
     document.getElementById('login-screen').classList.add('h');
     applySession();
   } else {
+    // Show login screen immediately — don't wait for the network fetch
     hideLdr();
   }
 
