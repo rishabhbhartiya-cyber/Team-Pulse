@@ -466,9 +466,9 @@ body.is-manager .mgr-only-inline { display:inline-block; }
     </div>
     <hr class="sep">
     <div class="fg">
-      <div class="f"><label>Productive Hours *</label><input type="number" id="e-prod" min="0" max="12" step="0.25" placeholder="5"></div>
-      <div class="f"><label>Meeting Hours *</label><input type="number" id="e-meet" min="0" max="8" step="0.25" placeholder="2"></div>
-      <div class="f"><label>Admin Hours *</label><input type="number" id="e-adm" min="0" max="4" step="0.25" placeholder="1"></div>
+      <div class="f"><label>Productive Hours</label><input type="number" id="e-prod" min="0" max="12" step="0.25" placeholder="5"></div>
+      <div class="f"><label>Meeting Hours</label><input type="number" id="e-meet" min="0" max="8" step="0.25" placeholder="2"></div>
+      <div class="f"><label>Admin Hours</label><input type="number" id="e-adm" min="0" max="4" step="0.25" placeholder="1"></div>
     </div>
   </div>
   <div class="card" style="margin-bottom:11px;"><h3>✅ Task Completion</h3>
@@ -984,11 +984,8 @@ function chkOT(){
 function subM(){
   var eid=document.getElementById('m-emp').value,date=document.getElementById('m-date').value,
       mode=document.getElementById('m-mode').value,login=document.getElementById('m-login').value,
-      td=document.getElementById('m-td').value.trim();
-  var tpRaw=document.getElementById('m-tp').value;
+      tp=+document.getElementById('m-tp').value||0,td=document.getElementById('m-td').value.trim();
   if(!eid||!date||!mode||!login){toast('Fill all required fields (*)','e');return;}
-  if(tpRaw===''){toast('Please enter Tasks Planned (*)','e');return;}
-  var tp=+tpRaw||0;
   if(!td){toast('Please describe your tasks for today','e');return;}
   if(!GAS_URL){setSS('err','No URL');toast('Connect Google Sheets in DB Setup before submitting.','e');sv('setup');return;}
   var emp=emps.find(function(e){return e.id===eid;});
@@ -1053,25 +1050,16 @@ function updCfy(){
 function subE(){
   var eid=document.getElementById('e-emp').value,date=document.getElementById('e-date').value,logout=document.getElementById('e-logout').value;
   if(!eid||!date||!logout){toast('Fill all required fields (*)','e');return;}
-  var cfyVal=document.getElementById('e-cfy').value;
-  if(cfyVal===''){toast('Please enter your Clockify Total Hours (*)','e');return;}
-  var tdnVal=document.getElementById('e-tdn').value;
-  if(tdnVal===''){toast('Please enter Tasks Completed (*)','e');return;}
-  var prodVal=document.getElementById('e-prod').value;
-  if(prodVal===''){toast('Please enter Productive Hours','e');return;}
-  var meetVal=document.getElementById('e-meet').value;
-  if(meetVal===''){toast('Please enter Meeting Hours','e');return;}
-  var admVal=document.getElementById('e-adm').value;
-  if(admVal===''){toast('Please enter Admin Hours','e');return;}
   var emp=emps.find(function(e){return e.id===eid;}),ci=cis.find(function(c){return c.empId===eid&&c.date===date;});
   var login=document.getElementById('e-login').value||(ci?ci.loginTime:'09:00');
   var brk=+document.getElementById('e-brk').value||0;
+  var cfyVal=document.getElementById('e-cfy').value;
   var r={id:Date.now(),date:date,empId:eid,empName:emp.name,team:emp.team,manager:emp.manager||'Manager',
     mode:ci?ci.mode:'Remote',loginTime:login,logoutTime:logout,breakHrs:brk,
-    clockifyHrs:+cfyVal,netHrs:calcNet(login,logout,brk),
-    prodHrs:+prodVal,meetHrs:+meetVal,
-    adminHrs:+admVal,
-    tasksPlanned:+document.getElementById('e-tpl').value||0,tasksDone:+tdnVal,
+    clockifyHrs:cfyVal!==''?+cfyVal:null,netHrs:calcNet(login,logout,brk),
+    prodHrs:+document.getElementById('e-prod').value||0,meetHrs:+document.getElementById('e-meet').value||0,
+    adminHrs:+document.getElementById('e-adm').value||0,
+    tasksPlanned:+document.getElementById('e-tpl').value||0,tasksDone:+document.getElementById('e-tdn').value||0,
     taskDoneText:document.getElementById('e-tdx').value,pending:document.getElementById('e-pnd').value,
     quality:getR('r-q')||3,responsiveness:getR('r-r')||3,ownership:getR('r-o')||3,
     blocker:document.getElementById('e-blk').value,support:document.getElementById('e-sup').value,
@@ -2246,9 +2234,9 @@ body.is-manager .mgr-only-inline { display:inline-block; }
     </div>
     <hr class="sep">
     <div class="fg">
-      <div class="f"><label>Productive Hours *</label><input type="number" id="e-prod" min="0" max="12" step="0.25" placeholder="5"></div>
-      <div class="f"><label>Meeting Hours *</label><input type="number" id="e-meet" min="0" max="8" step="0.25" placeholder="2"></div>
-      <div class="f"><label>Admin Hours *</label><input type="number" id="e-adm" min="0" max="4" step="0.25" placeholder="1"></div>
+      <div class="f"><label>Productive Hours</label><input type="number" id="e-prod" min="0" max="12" step="0.25" placeholder="5"></div>
+      <div class="f"><label>Meeting Hours</label><input type="number" id="e-meet" min="0" max="8" step="0.25" placeholder="2"></div>
+      <div class="f"><label>Admin Hours</label><input type="number" id="e-adm" min="0" max="4" step="0.25" placeholder="1"></div>
     </div>
   </div>
   <div class="card" style="margin-bottom:11px;"><h3>✅ Task Completion</h3>
@@ -2764,11 +2752,8 @@ function chkOT(){
 function subM(){
   var eid=document.getElementById('m-emp').value,date=document.getElementById('m-date').value,
       mode=document.getElementById('m-mode').value,login=document.getElementById('m-login').value,
-      td=document.getElementById('m-td').value.trim();
-  var tpRaw=document.getElementById('m-tp').value;
+      tp=+document.getElementById('m-tp').value||0,td=document.getElementById('m-td').value.trim();
   if(!eid||!date||!mode||!login){toast('Fill all required fields (*)','e');return;}
-  if(tpRaw===''){toast('Please enter Tasks Planned (*)','e');return;}
-  var tp=+tpRaw||0;
   if(!td){toast('Please describe your tasks for today','e');return;}
   if(!GAS_URL){setSS('err','No URL');toast('Connect Google Sheets in DB Setup before submitting.','e');sv('setup');return;}
   var emp=emps.find(function(e){return e.id===eid;});
@@ -2833,25 +2818,16 @@ function updCfy(){
 function subE(){
   var eid=document.getElementById('e-emp').value,date=document.getElementById('e-date').value,logout=document.getElementById('e-logout').value;
   if(!eid||!date||!logout){toast('Fill all required fields (*)','e');return;}
-  var cfyVal=document.getElementById('e-cfy').value;
-  if(cfyVal===''){toast('Please enter your Clockify Total Hours (*)','e');return;}
-  var tdnVal=document.getElementById('e-tdn').value;
-  if(tdnVal===''){toast('Please enter Tasks Completed (*)','e');return;}
-  var prodVal=document.getElementById('e-prod').value;
-  if(prodVal===''){toast('Please enter Productive Hours','e');return;}
-  var meetVal=document.getElementById('e-meet').value;
-  if(meetVal===''){toast('Please enter Meeting Hours','e');return;}
-  var admVal=document.getElementById('e-adm').value;
-  if(admVal===''){toast('Please enter Admin Hours','e');return;}
   var emp=emps.find(function(e){return e.id===eid;}),ci=cis.find(function(c){return c.empId===eid&&c.date===date;});
   var login=document.getElementById('e-login').value||(ci?ci.loginTime:'09:00');
   var brk=+document.getElementById('e-brk').value||0;
+  var cfyVal=document.getElementById('e-cfy').value;
   var r={id:Date.now(),date:date,empId:eid,empName:emp.name,team:emp.team,manager:emp.manager||'Manager',
     mode:ci?ci.mode:'Remote',loginTime:login,logoutTime:logout,breakHrs:brk,
-    clockifyHrs:+cfyVal,netHrs:calcNet(login,logout,brk),
-    prodHrs:+prodVal,meetHrs:+meetVal,
-    adminHrs:+admVal,
-    tasksPlanned:+document.getElementById('e-tpl').value||0,tasksDone:+tdnVal,
+    clockifyHrs:cfyVal!==''?+cfyVal:null,netHrs:calcNet(login,logout,brk),
+    prodHrs:+document.getElementById('e-prod').value||0,meetHrs:+document.getElementById('e-meet').value||0,
+    adminHrs:+document.getElementById('e-adm').value||0,
+    tasksPlanned:+document.getElementById('e-tpl').value||0,tasksDone:+document.getElementById('e-tdn').value||0,
     taskDoneText:document.getElementById('e-tdx').value,pending:document.getElementById('e-pnd').value,
     quality:getR('r-q')||3,responsiveness:getR('r-r')||3,ownership:getR('r-o')||3,
     blocker:document.getElementById('e-blk').value,support:document.getElementById('e-sup').value,
