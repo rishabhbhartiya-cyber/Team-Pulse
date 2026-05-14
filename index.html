@@ -466,9 +466,9 @@ body.is-manager .mgr-only-inline { display:inline-block; }
     </div>
     <hr class="sep">
     <div class="fg">
-      <div class="f"><label>Productive Hours</label><input type="number" id="e-prod" min="0" max="12" step="0.25" placeholder="5"></div>
-      <div class="f"><label>Meeting Hours</label><input type="number" id="e-meet" min="0" max="8" step="0.25" placeholder="2"></div>
-      <div class="f"><label>Admin Hours</label><input type="number" id="e-adm" min="0" max="4" step="0.25" placeholder="1"></div>
+      <div class="f"><label>Productive Hours *</label><input type="number" id="e-prod" min="0" max="12" step="0.25" placeholder="5"></div>
+      <div class="f"><label>Meeting Hours *</label><input type="number" id="e-meet" min="0" max="8" step="0.25" placeholder="2"></div>
+      <div class="f"><label>Admin Hours *</label><input type="number" id="e-adm" min="0" max="4" step="0.25" placeholder="1"></div>
     </div>
   </div>
   <div class="card" style="margin-bottom:11px;"><h3>✅ Task Completion</h3>
@@ -483,11 +483,11 @@ body.is-manager .mgr-only-inline { display:inline-block; }
       <div class="f fc"><label>Pending / Leftover Tasks</label><textarea id="e-pnd" placeholder="Module 4 review pushed to tomorrow..."></textarea></div>
     </div>
   </div>
-  <div class="card" style="margin-bottom:11px;"><h3>⭐ Self-Assessment</h3>
+  <div class="card" style="margin-bottom:11px;"><h3>⭐ Self-Assessment *</h3>
     <div class="fg">
-      <div class="f"><label>Quality (1–5)</label><div class="rrow" id="r-q"></div></div>
-      <div class="f"><label>Responsiveness (1–5)</label><div class="rrow" id="r-r"></div></div>
-      <div class="f"><label>Ownership (1–5)</label><div class="rrow" id="r-o"></div></div>
+      <div class="f"><label>Quality (1–5) *</label><div class="rrow" id="r-q"></div></div>
+      <div class="f"><label>Responsiveness (1–5) *</label><div class="rrow" id="r-r"></div></div>
+      <div class="f"><label>Ownership (1–5) *</label><div class="rrow" id="r-o"></div></div>
     </div>
   </div>
   <div class="card" style="margin-bottom:15px;"><h3>💬 Notes &amp; Blockers</h3>
@@ -678,12 +678,9 @@ var DB={
 };
 // ══════════════════════════════════════════════════
 //  GOOGLE SHEETS CONNECTION — HARDCODED FOR ALL DEVICES
-//  This URL is baked into the app. Every device that opens
-//  the GitHub Pages link connects to the same Sheet automatically.
 // ══════════════════════════════════════════════════
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbzxyQTp3Jp0x4bqoYoL2wicpGX0ugthE32W8anFcms4RUagrKy_Omwlh8QIojScBYieag/exec';
-DB.set('tp_url', GAS_URL); // keep localStorage in sync
-
+DB.set('tp_url', GAS_URL);
 
 var emps    = DB.get('tp_e')   || [];
 var cis     = DB.get('tp_c')   || [];
@@ -691,9 +688,7 @@ var rpts    = DB.get('tp_r')   || [];
 var lastSyn = DB.get('tp_ls')  || '';
 
 // ══════════════════════════════════════════════════
-//  JSONP BRIDGE — only reliable method from GitHub Pages → GAS
-//  GAS does not send CORS headers so fetch() is always blocked.
-//  Uses callback= param which Code.gs supports (params.cb || params.callback).
+//  JSONP BRIDGE
 // ══════════════════════════════════════════════════
 var _cbIdx = 0;
 function jsonp(url, timeout) {
@@ -725,7 +720,6 @@ function jsonp(url, timeout) {
       reject(new Error('Script load error — check your Web App URL'));
     };
 
-    // callback= is supported by Code.gs (params.cb || params.callback)
     var sep = url.indexOf('?') >= 0 ? '&' : '?';
     script.src = url + sep + 'callback=' + cbName;
     document.head.appendChild(script);
@@ -752,7 +746,6 @@ function gasCall(action, data) {
 function loadAll() {
   if (!GAS_URL) { setSS('err','No URL set'); hideLdr(); return; }
   setSS('busy','Syncing...');
-  // Only show full-screen loader if the user hasn't logged in yet
   if (!currentUser) { showLdr('Loading from Google Sheets...'); }
   gasCall('getAll')
     .then(function(d) {
@@ -764,7 +757,6 @@ function loadAll() {
       lastSyn = new Date().toLocaleTimeString();
       DB.set('tp_ls', lastSyn);
       setSS('ok', 'Synced ✓');
-      // Re-populate login dropdown with fresh employees from Sheets
       initLoginDropdown();
       popDDs(); initDashPeriodFilters(); renderD();
       updSetupStatus();
@@ -776,7 +768,6 @@ function loadAll() {
         ? 'Google Sheet connection timed out. Check your internet connection.'
         : 'Could not reach Google Sheets: ' + err.message;
       toast(msg, 'e');
-      // If manager is logged in, offer to go to setup
       if (currentUser && currentUser.role === 'manager') {
         setTimeout(function() { toast('Manager: check DB Setup tab if URL is wrong.', 'i'); }, 3500);
       }
@@ -798,7 +789,6 @@ function testURL() {
   if (!url) { document.getElementById('su-status').innerHTML = '<span style="color:var(--red)">Please paste your Web App URL first.</span>'; return; }
   document.getElementById('su-status').innerHTML = '<span style="color:var(--mut)">Testing connection...</span>';
   setSS('busy', 'Testing...');
-  // Temporarily use this URL for the test
   var oldURL = GAS_URL;
   GAS_URL = url;
   gasCall('ping')
@@ -899,19 +889,14 @@ function init(){
   document.getElementById('mlbl').textContent='Today · '+now;
   document.getElementById('elbl').textContent='Today · '+now;
 
-  // Load cached data immediately for instant render
   initDashPeriodFilters();
   if(emps.length>0){popDDs();renderD();}
 
-  // Init login dropdown immediately using cached employees
-  // (critical for mobile — don't wait for network fetch)
   initLoginDropdown();
   applyTheme();
 
-  // Restore session
   var savedUser = DB.get('tp_cu');
   if (savedUser && savedUser.id) {
-    // Validate saved employee still exists
     if (savedUser.role === 'employee') {
       var stillExists = emps.find(function(e){ return e.id === savedUser.id; });
       if (!stillExists && emps.length > 0) { savedUser = null; DB.set('tp_cu', null); }
@@ -923,14 +908,12 @@ function init(){
     document.getElementById('login-screen').classList.add('h');
     applySession();
   } else {
-    // Show login immediately — don't wait for network
     hideLdr();
   }
 
   if(GAS_URL){
     loadAll();
   } else {
-    // No URL configured — only manager sees setup
     setSS('err','No Sheet URL');
     hideLdr();
     if (currentUser && currentUser.role === 'manager') {
@@ -970,11 +953,6 @@ function popDDs(){
 function onME(){
   var emp=emps.find(function(e){return e.id===document.getElementById('m-emp').value;});
   document.getElementById('m-team').value=emp?emp.team:'';
-  if(emp&&emp.shift){
-    var sh=+emp.shift.split(':')[0],sm=+emp.shift.split(':')[1];
-    var f=function(d){return d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});};
-    // timing removed from schedule display
-  }
   chkOT();
 }
 function chkOT(){
@@ -1052,15 +1030,38 @@ function updCfy(){
   } else {dEl.value='';dEl.style.color='';hEl.style.color='var(--mut)';hEl.textContent='Should be close to 0';}
 }
 function subE(){
+  // ── Step 1: basic required fields ──
   var eid=document.getElementById('e-emp').value,date=document.getElementById('e-date').value,logout=document.getElementById('e-logout').value;
   if(!eid||!date||!logout){toast('Fill all required fields (*)','e');return;}
+
+  // ── Step 2: Clockify Hours ──
+  var cfyCheck=document.getElementById('e-cfy').value;
+  if(cfyCheck===''){toast('Please enter your Clockify Total Hours (*)','e');return;}
+
+  // ── Step 3: Tasks Completed ──
+  var tdnCheck=document.getElementById('e-tdn').value;
+  if(tdnCheck===''){toast('Please enter Tasks Completed (*)','e');return;}
+
+  // ── Step 4: Hour breakdown ──
+  var prodCheck=document.getElementById('e-prod').value;
+  if(prodCheck===''){toast('Please enter Productive Hours (*)','e');return;}
+  var meetCheck=document.getElementById('e-meet').value;
+  if(meetCheck===''){toast('Please enter Meeting Hours (*)','e');return;}
+  var admCheck=document.getElementById('e-adm').value;
+  if(admCheck===''){toast('Please enter Admin Hours (*)','e');return;}
+
+  // ── Step 5: Self-Assessment ratings ──
+  var rqCheck=document.querySelector('#r-q .rb.on');
+  var rrCheck=document.querySelector('#r-r .rb.on');
+  var roCheck=document.querySelector('#r-o .rb.on');
+  if(!rqCheck||!rrCheck||!roCheck){toast('Please fill all Self-Assessment ratings (*)','e');return;}
+
   var emp=emps.find(function(e){return e.id===eid;}),ci=cis.find(function(c){return c.empId===eid&&c.date===date;});
   var login=document.getElementById('e-login').value||(ci?ci.loginTime:'09:00');
   var brk=+document.getElementById('e-brk').value||0;
-  var cfyVal=document.getElementById('e-cfy').value;
   var r={id:Date.now(),date:date,empId:eid,empName:emp.name,team:emp.team,manager:emp.manager||'Manager',
     mode:ci?ci.mode:'Remote',loginTime:login,logoutTime:logout,breakHrs:brk,
-    clockifyHrs:cfyVal!==''?+cfyVal:null,netHrs:calcNet(login,logout,brk),
+    clockifyHrs:+cfyCheck,netHrs:calcNet(login,logout,brk),
     prodHrs:+document.getElementById('e-prod').value||0,meetHrs:+document.getElementById('e-meet').value||0,
     adminHrs:+document.getElementById('e-adm').value||0,
     tasksPlanned:+document.getElementById('e-tpl').value||0,tasksDone:+document.getElementById('e-tdn').value||0,
@@ -1179,7 +1180,7 @@ function getDashPeriodRange(){
     label = 'Today (' + fmtDashDate(today) + ')';
   } else if(type === 'thisweek'){
     var now2 = new Date();
-    var day = now2.getDay(); // 0=Sun
+    var day = now2.getDay();
     var monOffset = (day === 0) ? -6 : 1 - day;
     var mon = new Date(now2); mon.setDate(now2.getDate() + monOffset);
     var sun = new Date(mon); sun.setDate(mon.getDate() + 6);
@@ -1228,7 +1229,6 @@ function renderD(){
   document.getElementById('mk-lt').textContent=dCIs.length-otN;
   document.getElementById('mk-ms').textContent=Math.max(0,aEmps.length-dCIs.length);
   document.getElementById('mk-upd').textContent='Updated: '+new Date().toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true});
-  // Morning cards
   var grid=document.getElementById('mg');grid.innerHTML='';
   if(!dCIs.length){grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--mut);">No morning check-ins found for this period.</div>';}
   else{dCIs.sort(function(a,b){return a.loginTime.localeCompare(b.loginTime);}).forEach(function(ci){
@@ -1596,7 +1596,6 @@ function doPost(e) {
 
 function handleRequest(e) {
   const params = (e && e.parameter) || {};
-  // Support both callback= (sent by the app) and cb= (legacy)
   const callback = params.callback || params.cb || "";
 
   try {
@@ -1911,18 +1910,13 @@ function showLdr(m){document.getElementById('ldr').classList.remove('h');documen
 function hideLdr(){document.getElementById('ldr').classList.add('h');}
 
 // ══════════════════════════════════════════════════
-//  START
-// ══════════════════════════════════════════════════
-
-// ══════════════════════════════════════════════════
 //  AUTH — login / logout / roles
 // ══════════════════════════════════════════════════
-var MANAGER_PIN = '1234'; // Change this to your desired PIN
-var currentUser  = null;  // { id, name, team, role: 'employee'|'manager' }
+var MANAGER_PIN = '1234';
+var currentUser  = null;
 
 function initLoginDropdown() {
   var sel = document.getElementById('login-emp-sel');
-  // Clear existing employee options (keep first two: blank + manager)
   while (sel.options.length > 2) sel.remove(2);
   emps.filter(function(e){ return e.status === 'Active'; })
     .sort(function(a,b){ return a.name.localeCompare(b.name); })
@@ -1971,7 +1965,6 @@ function doLogin() {
 function doLogout() {
   currentUser = null;
   DB.set('tp_cu', null);
-  // Reset UI
   document.body.classList.remove('is-manager');
   document.getElementById('login-screen').classList.remove('h');
   document.getElementById('login-emp-sel').value = '';
@@ -1979,13 +1972,11 @@ function doLogout() {
   document.getElementById('login-pin-wrap').style.display = 'none';
   document.getElementById('login-err').textContent = '';
   document.getElementById('quote-banner').style.display = 'none';
-  // Auto-fill morning name if employee just logged out and comes back
 }
 
 function applySession() {
   if (!currentUser) return;
 
-  // User badge
   document.getElementById('user-badge-name').textContent = currentUser.name;
   var roleBadge = document.getElementById('user-role-badge');
   if (currentUser.role === 'manager') {
@@ -1998,7 +1989,6 @@ function applySession() {
     document.body.classList.remove('is-manager');
   }
 
-  // Auto-select employee in forms
   if (currentUser.role === 'employee') {
     var mSel = document.getElementById('m-emp');
     var eSel = document.getElementById('e-emp');
@@ -2009,7 +1999,6 @@ function applySession() {
   applyTheme();
   showQuote();
 
-  // Show correct default view
   if (currentUser.role === 'manager') {
     sv('admin');
   } else {
@@ -2030,11 +2019,11 @@ function applySession() {
 }
 
 // ══════════════════════════════════════════════════
-//  THEME — morning bright / evening dark
+//  THEME
 // ══════════════════════════════════════════════════
 function applyTheme() {
   var hr = new Date().getHours();
-  var isMorning = (hr >= 5 && hr < 15); // 5am–3pm = morning theme
+  var isMorning = (hr >= 5 && hr < 15);
   if (isMorning) {
     document.body.classList.add('theme-morning');
   } else {
@@ -2043,7 +2032,7 @@ function applyTheme() {
 }
 
 // ══════════════════════════════════════════════════
-//  QUOTES — morning welcome / evening appreciation
+//  QUOTES
 // ══════════════════════════════════════════════════
 var MORNING_QUOTES = [
   { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
@@ -2093,7 +2082,7 @@ function showQuote() {
 }
 
 // ══════════════════════════════════════════════════
-//  OVERRIDE sv() to enforce role-based access
+//  ROLE-BASED NAV GUARD
 // ══════════════════════════════════════════════════
 var _svOriginal = sv;
 sv = function(v) {
@@ -2104,7 +2093,6 @@ sv = function(v) {
   }
   _svOriginal(v);
 };
-
 
 function showSuccessModal(name,type){
   document.getElementById('success-modal-name').textContent=name+',';
