@@ -966,8 +966,10 @@ function chkOT(){
 function subM(){
   var eid=document.getElementById('m-emp').value,date=document.getElementById('m-date').value,
       mode=document.getElementById('m-mode').value,login=document.getElementById('m-login').value,
-      tp=+document.getElementById('m-tp').value||0,td=document.getElementById('m-td').value.trim();
+      tp=+document.getElementById('m-tp').value,td=document.getElementById('m-td').value.trim();
   if(!eid||!date||!mode||!login){toast('Fill all required fields (*)','e');return;}
+  var tpVal=document.getElementById('m-tp').value;
+  if(tpVal===''){toast('Please enter Tasks Planned (*)','e');return;}
   if(!td){toast('Please describe your tasks for today','e');return;}
   if(!GAS_URL){setSS('err','No URL');toast('Connect Google Sheets in DB Setup before submitting.','e');sv('setup');return;}
   var emp=emps.find(function(e){return e.id===eid;});
